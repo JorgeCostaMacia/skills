@@ -40,14 +40,24 @@ Canon-anchored (Evans' *Domain-Driven Design*, Vernon's *Implementing DDD*): sec
 - Conversion is one-directional: VO → primitive is cheap; **primitive → VO only through the factory**.
 - Values with no rules stay plain primitives — don't wrap for ceremony.
 
-## Validation — principles
+## Validation — two levels
 
-1. **[canon]** Nothing invalid is *created* (the factory guarantees it), and domain validation runs on **every** path — HTTP, bus, backfill — not only the interactive one.
-2. **[canon]** VO/aggregate rules are **pure** — no services, no IO. A rule that needs a service (uniqueness against a store…) is an application-level rule, not a domain-type rule.
-3. **[our convention]** Each rule is defined **once**, in the type's own **composable validator**; the factory invokes it, and the boundary validator (request/aggregate) **composes the validators of its VOs** to return the **complete list of failures, per field, in one pass — before constructing anything**. Why: drip-feeding errors one construction at a time is hostile; forms and APIs need the full report. Two checkpoints, one source of rules — defense in depth, not duplication.
-4. **[our convention]** Layered on purpose: the boundary validates the *input contract*; the domain validates *business invariants*. Composition order: validate the composed whole first (full report), then construct (factories re-check trivially).
+**Level 1 — intrinsic validity (invariants): the type owns it — [canon]**
 
-*How* rules compose (declared constraints with collected violations, external composable validators…) is the **stack skill's decision** — judge designs against these principles, not against a particular mechanism.
+- *"Is this object correct in itself?"* Rules answerable by looking only at the object's values — **pure**: no services, no IO.
+- Enforced by the **factory**: it runs the type's validator before returning — **nothing invalid escapes a factory**. (Instance-based validators may build-then-validate internally; the guarantee is at the factory boundary, not the micro-order inside it.) Being pure, the validator needs no injection.
+- Structural, so it holds on **every** path — HTTP, bus, backfill — nobody has to remember it.
+
+**Level 2 — use-case validity (preconditions): the use case owns it — [canon]**
+
+- *"Is this correct object admissible **here, now**?"* Rules that need services or state: uniqueness against a store, referenced things existing, business-state conflicts. Not properties of the object — properties of the **system state at a moment** (the same email is valid today and a duplicate tomorrow).
+- They live in **Application**, with injected dependencies, and reject with **domain errors** ("already exists"…). Where a data constraint backs the rule (a unique index), the application check gives the friendly error and the constraint gives the concurrency-proof guarantee.
+- The litmus test: **if the rule needs a service, it's level 2** — a type's validator must stay pure.
+
+**How the rules are held — [our convention]**
+
+- Each rule is defined **once**, in the type's own **composable validator**; the factory invokes it (level 1), and boundary validators (request/aggregate) **compose** the validators of their parts to return the **complete list of failures, per field, in one pass** — nothing invalid travels past the boundary, and errors never drip one construction at a time.
+- Multiple checkpoints, one source of rules — defense in depth, not duplication. *How* rules compose (declared constraints with collected violations, external composable validators…) is the **stack skill's decision** — judge designs against these principles, not against a particular mechanism.
 
 ## Data access — [canon: the repository role]
 
