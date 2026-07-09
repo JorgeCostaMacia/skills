@@ -14,6 +14,7 @@ Each skill lives as its own plugin under `plugins/`, so you can install only wha
 | --- | --- |
 | [gitflow](plugins/gitflow) | GitFlow workflow — feature / bugfix / release / hotfix start & finish, SemVer tags, default merge messages, commit identity, and the phased-publish caveat. |
 | [solid](plugins/solid) | Transversal engineering principles for any code, front or back — SOLID, simple design, clean code, code smells and complexity management, applied with judgment, not dogma. |
+| [pnpm](plugins/pnpm) | Package-management baseline for any Node.js work — pnpm with dependency lifecycle scripts blocked, minimum release age for new versions, pinned package manager and frozen lockfile in CI. |
 
 ## Install
 
