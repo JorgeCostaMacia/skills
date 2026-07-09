@@ -16,7 +16,7 @@ Each skill lives as its own plugin under `plugins/`, so you can install only wha
 | [solid](plugins/solid) | Transversal engineering principles for any code, front or back — SOLID, simple design, clean code, code smells and complexity management, applied with judgment, not dogma. |
 | [pnpm](plugins/pnpm) | Package-management baseline for any Node.js work — pnpm with dependency lifecycle scripts blocked, minimum release age for new versions, pinned package manager and frozen lockfile in CI. |
 | [clean-architecture](plugins/clean-architecture) | Clean architecture layering with hexagonal (ports & adapters) boundaries, stack-agnostic: the four layers, the inward dependency rule, and where things go. |
-| [ddd](plugins/ddd) | Tactical Domain-Driven Design, stack-agnostic: ubiquitous language, aggregates as consistency boundaries, validate-on-creation, value objects, past-tense domain events, and the family pattern. |
+| [ddd](plugins/ddd) | Tactical Domain-Driven Design, stack-agnostic and canon-anchored: ubiquitous language, aggregates, factories & hydration, value objects, validation principles, per-aggregate data accessors, domain events and domain errors. |
 | [testing](plugins/testing) | Testing principles and the pragmatic TDD loop, stack-agnostic: done means tested, names as specification, AAA, test independence, behavior over implementation, rule coverage over line coverage. |
 
 ## Install
