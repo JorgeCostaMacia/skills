@@ -3,6 +3,11 @@
 Thumbs.db
 *.swp
 .idea/
+.vscode/
+.history/
+
+# Claude Code local settings
+.claude/settings.local.json
 
 # Tooling output (if evals/scripts are added later)
 node_modules/
