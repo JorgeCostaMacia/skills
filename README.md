@@ -15,6 +15,9 @@ Each skill lives as its own plugin under `plugins/`, so you can install only wha
 | [gitflow](plugins/gitflow) | GitFlow workflow — feature / bugfix / release / hotfix start & finish, SemVer tags, default merge messages, commit identity, and the phased-publish caveat. |
 | [solid](plugins/solid) | Transversal engineering principles for any code, front or back — SOLID, simple design, clean code, code smells and complexity management, applied with judgment, not dogma. |
 | [pnpm](plugins/pnpm) | Package-management baseline for any Node.js work — pnpm with dependency lifecycle scripts blocked, minimum release age for new versions, pinned package manager and frozen lockfile in CI. |
+| [clean-architecture](plugins/clean-architecture) | Clean architecture layering with hexagonal (ports & adapters) boundaries, stack-agnostic and canon-anchored: the four layers inside each bounded context, the inward dependency rule, ports for external capabilities, and the name mapping to Evans, Uncle Bob, Microsoft and Jason Taylor. |
+| [ddd](plugins/ddd) | Tactical Domain-Driven Design, stack-agnostic and canon-anchored: ubiquitous language, aggregates, factories & hydration, value objects, validation principles, per-aggregate data accessors, domain events and domain errors. |
+| [testing](plugins/testing) | Testing principles and the pragmatic TDD loop, stack-agnostic and canon-anchored: done means tested, the test pyramid, one test file per unit, names as specification, AAA and independence, classicist test doubles, behavior over implementation, and rule coverage over line coverage. |
 
 ## Install
 
