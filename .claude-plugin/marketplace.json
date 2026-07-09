@@ -13,6 +13,11 @@
       "name": "solid",
       "source": "./plugins/solid",
       "description": "Transversal engineering principles for any code, front or back: SOLID, simple design, clean code, code smells and complexity management — applied with judgment, not dogma."
+    },
+    {
+      "name": "pnpm",
+      "source": "./plugins/pnpm",
+      "description": "Package-management baseline for any Node.js work: pnpm with dependency lifecycle scripts blocked, minimum release age for new versions, pinned package manager and frozen lockfile in CI."
     }
   ]
 }
