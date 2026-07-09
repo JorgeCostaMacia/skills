@@ -88,21 +88,26 @@ public class OrderTypeValueObjectValidator : AbstractValidator<OrderTypeValueObj
 
 ## The composite rule — full report, no drip
 
-**An aggregate never calls its parts' `Create`.** Its factory materializes the parts with `From` and validates the whole aggregate **composed, once**:
+**An aggregate never calls its parts' `Create`.** The three-verb surface applies to aggregates too — **`From` cascades, `Create` seals**:
 
 ```csharp
+// FROM cascades: materializes the whole aggregate unvalidated —
+// parts via THEIR From (normalized, no VO throws individually).
+public static Factura From(int id, string? email, ...) =>
+    new(id, EmailValueObject.From(email), ...);
+
+// CREATE seals: own From + ONE composed pass — the aggregate's validator
+// (which Includes its VOs' validators) throws ONE exception carrying
+// the COMPLETE per-field failure list.
 public static Factura Create(int id, string? email, ...)
 {
-    // Parts via From — unvalidated, normalized; no VO throws individually.
-    Factura aggregate = new(id, EmailValueObject.From(email), ...);
-
-    // ONE pass: the aggregate's validator (which Includes its VOs' validators)
-    // throws ONE exception carrying the COMPLETE per-field failure list.
+    Factura aggregate = From(id, email, ...);
     Validator.ValidateAndThrow(aggregate);
-
     return aggregate;
 }
 ```
+
+The pattern recurses: an aggregate root with child entities builds them through *their* `From` inside its own, and its `Create` validates the whole tree composed, once. `Create`'s body is identical at every level — uniformity is the point.
 
 - Calling parts' `Create` inside an aggregate factory reintroduces the drip (first invalid VO throws alone) — the exact problem the composed validator solves.
 - The invalid aggregate exists only *inside* its factory — nothing invalid escapes it (`ddd`: the guarantee is at the factory boundary, not the micro-order inside).
