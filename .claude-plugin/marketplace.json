@@ -8,6 +8,11 @@
       "name": "gitflow",
       "source": "./plugins/gitflow",
       "description": "Jorge's GitFlow workflow: feature/bugfix/release/hotfix start & finish, SemVer tags, default merge messages, commit identity, and the phased-publish caveat."
+    },
+    {
+      "name": "solid",
+      "source": "./plugins/solid",
+      "description": "Transversal engineering principles for any code, front or back: SOLID, simple design, clean code, code smells and complexity management — applied with judgment, not dogma."
     }
   ]
 }

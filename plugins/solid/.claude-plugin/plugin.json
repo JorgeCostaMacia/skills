@@ -1,0 +1,10 @@
+{
+  "name": "solid",
+  "description": "Transversal software-engineering principles: SOLID, simple design, clean code, code smells and complexity management — applied with judgment, not dogma.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Jorge Costa Maciá",
+    "email": "costamaciajorge@gmail.com"
+  },
+  "license": "MIT"
+}
