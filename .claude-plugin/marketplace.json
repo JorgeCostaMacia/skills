@@ -33,6 +33,11 @@
       "name": "testing",
       "source": "./plugins/testing",
       "description": "Testing principles and the pragmatic TDD loop, stack-agnostic and canon-anchored: done means tested, the test pyramid, one test file per unit, names as specification, AAA and independence, classicist test doubles, behavior over implementation, and rule coverage over line coverage."
+    },
+    {
+      "name": "validation-net",
+      "source": "./plugins/validation-net",
+      "description": "The .NET realization of the two-level validation model: FluentValidation, the three-verb creation surface (ctor hydrates, From converts, Create validates), validator Create() chains, the composite full-report rule, family exceptions with fixed codes, and use-case preconditions in Application."
     }
   ]
 }
