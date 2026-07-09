@@ -32,7 +32,7 @@
     {
       "name": "testing",
       "source": "./plugins/testing",
-      "description": "Testing principles and the pragmatic TDD loop, stack-agnostic: done means tested, names as specification, AAA, test independence, behavior over implementation, rule coverage over line coverage."
+      "description": "Testing principles and the pragmatic TDD loop, stack-agnostic and canon-anchored: done means tested, the test pyramid, one test file per unit, names as specification, AAA and independence, classicist test doubles, behavior over implementation, and rule coverage over line coverage."
     }
   ]
 }

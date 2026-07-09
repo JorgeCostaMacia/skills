@@ -17,7 +17,7 @@ Each skill lives as its own plugin under `plugins/`, so you can install only wha
 | [pnpm](plugins/pnpm) | Package-management baseline for any Node.js work — pnpm with dependency lifecycle scripts blocked, minimum release age for new versions, pinned package manager and frozen lockfile in CI. |
 | [clean-architecture](plugins/clean-architecture) | Clean architecture layering with hexagonal (ports & adapters) boundaries, stack-agnostic: the four layers, the inward dependency rule, and where things go. |
 | [ddd](plugins/ddd) | Tactical Domain-Driven Design, stack-agnostic and canon-anchored: ubiquitous language, aggregates, factories & hydration, value objects, validation principles, per-aggregate data accessors, domain events and domain errors. |
-| [testing](plugins/testing) | Testing principles and the pragmatic TDD loop, stack-agnostic: done means tested, names as specification, AAA, test independence, behavior over implementation, rule coverage over line coverage. |
+| [testing](plugins/testing) | Testing principles and the pragmatic TDD loop, stack-agnostic and canon-anchored: done means tested, the test pyramid, one test file per unit, names as specification, AAA and independence, classicist test doubles, behavior over implementation, and rule coverage over line coverage. |
 
 ## Install
 
