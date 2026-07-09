@@ -1,7 +1,7 @@
 {
   "name": "clean-architecture",
   "description": "Clean architecture layering with hexagonal (ports & adapters) boundaries, stack-agnostic and canon-anchored: the four layers inside each bounded context, the inward dependency rule, ports for external capabilities, and the name mapping to Evans, Uncle Bob, Microsoft and Jason Taylor.",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "author": {
     "name": "Jorge Costa Maciá",
     "email": "costamaciajorge@gmail.com"
