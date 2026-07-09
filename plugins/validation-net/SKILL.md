@@ -41,7 +41,8 @@ public record EmailValueObject : StringValueObject
 
     // 2. CONVERT — normalizes and materializes, UNVALIDATED. The composites' path.
     //    Conversion vocabulary: promises materialization, not validity.
-    public new static EmailValueObject From(string value) => new(value.Trim());
+    //    Normalization comes from the base's protected Convert — defined ONCE, never re-inlined.
+    public new static EmailValueObject From(string value) => new(Convert(value));
 
     // 3. CREATE — the guarantee: nothing invalid escapes Create.
     public new static EmailValueObject Create(string value)
@@ -55,6 +56,8 @@ public record EmailValueObject : StringValueObject
 ```
 
 Mental convention: **ctor hydrates · `From` converts · `Create` fabricates validated.** Derived VOs redefine `From`/`Create` with the `new` modifier — only the overloads they actually need.
+
+**Normalization lives ONCE, in the base's `protected static Convert`** (natural primitive → natural primitive, e.g. `protected static string Convert(string value) => value.Trim();`): every `From` in the hierarchy materializes through it (`new(Convert(value))`) — derived VOs never re-inline trimming/normalization, so the rule can't drift across types.
 
 ## The validator pattern
 

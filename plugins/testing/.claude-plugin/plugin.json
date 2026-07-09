@@ -1,7 +1,7 @@
 {
   "name": "testing",
   "description": "Testing principles and the pragmatic TDD loop, stack-agnostic and canon-anchored: done means tested, the test pyramid, one test file per unit, names as specification, AAA and independence, classicist test doubles, behavior over implementation, and rule coverage over line coverage.",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "author": {
     "name": "Jorge Costa Maciá",
     "email": "costamaciajorge@gmail.com"
