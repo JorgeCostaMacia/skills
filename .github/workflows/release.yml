@@ -1,0 +1,33 @@
+# Release: when a v* tag is pushed (by the GitFlow release/hotfix finish), create the
+# matching GitHub Release with auto-generated notes and attach each skill as a zip
+# asset. Unlike the .NET repos (which publish their artifacts to NuGet from main.yml),
+# the release IS the packaged distribution here.
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write # required to create the GitHub Release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Package skills
+        run: |
+          mkdir -p dist
+          for plugin in plugins/*/; do
+            name=$(basename "$plugin")
+            (cd "$plugin" && zip -r "$GITHUB_WORKSPACE/dist/$name.zip" .)
+          done
+          ls -l dist
+      - name: Create Release
+        uses: softprops/action-gh-release@v3
+        with:
+          generate_release_notes: true
+          files: dist/*.zip
