@@ -48,6 +48,7 @@ public record EmailValueObject : StringValueObject
     {
         EmailValueObject vo = From(value);
         Validator.ValidateAndThrow(vo);
+
         return vo;
     }
 }
@@ -103,6 +104,7 @@ public static Factura Create(int id, string? email, ...)
 {
     Factura aggregate = From(id, email, ...);
     Validator.ValidateAndThrow(aggregate);
+
     return aggregate;
 }
 ```
