@@ -1,7 +1,7 @@
 {
   "name": "ddd",
   "description": "Tactical Domain-Driven Design, stack-agnostic and canon-anchored: ubiquitous language, aggregates, factories & hydration, value objects, validation principles, per-aggregate data accessors, domain events and domain errors.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "Jorge Costa Maciá",
     "email": "costamaciajorge@gmail.com"
