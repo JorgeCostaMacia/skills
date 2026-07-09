@@ -88,24 +88,24 @@ public class OrderTypeValueObjectValidator : AbstractValidator<OrderTypeValueObj
 
 ## The composite rule — full report, no drip
 
-**A composite never calls its parts' `Create`.** It materializes candidates with `From` and validates everything **composed, once**:
+**An aggregate never calls its parts' `Create`.** Its factory materializes the parts with `From` and validates the whole aggregate **composed, once**:
 
 ```csharp
-public static Entidades Create(int id, string? email, ...)
+public static Factura Create(int id, string? email, ...)
 {
-    // Candidates via From — unvalidated, normalized; no VO throws individually.
-    Entidades candidato = new(id, EmailValueObject.From(email), ...);
+    // Parts via From — unvalidated, normalized; no VO throws individually.
+    Factura aggregate = new(id, EmailValueObject.From(email), ...);
 
     // ONE pass: the aggregate's validator (which Includes its VOs' validators)
     // throws ONE exception carrying the COMPLETE per-field failure list.
-    Validator.ValidateAndThrow(candidato);
+    Validator.ValidateAndThrow(aggregate);
 
-    return candidato;
+    return aggregate;
 }
 ```
 
-- Calling parts' `Create` inside a composite reintroduces the drip (first invalid VO throws alone) — the exact problem the composed validator solves.
-- The invalid candidate exists only *inside* the factory — nothing invalid escapes it (`ddd`: the guarantee is at the factory boundary, not the micro-order inside).
+- Calling parts' `Create` inside an aggregate factory reintroduces the drip (first invalid VO throws alone) — the exact problem the composed validator solves.
+- The invalid aggregate exists only *inside* its factory — nothing invalid escapes it (`ddd`: the guarantee is at the factory boundary, not the micro-order inside).
 - `ValidateAndThrow` runs ALL the validator's rules and reports every failure in one exception — the full report is native.
 
 ## The family pattern (errors with fixed codes)
@@ -132,8 +132,8 @@ Request validators compose the same rule sources and run **before anything else*
 
 ```csharp
 // In the use-case service — dependencies injected, rejects with the family's domain error:
-Entidades? existing = await Context.EntidadesRepository.FindAsync(payload.Id);
-if (existing != null) throw new EntidadesExistException(...);
+Factura? existing = await Context.FacturaRepository.FindAsync(aggregate.Id);
+if (existing != null) throw new FacturaExistException(...);
 ```
 
 - Uniqueness gets the **double defense**: the application check gives the friendly domain error; the **unique index** gives the concurrency-proof guarantee (translate its violation to the same family exception).
