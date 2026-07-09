@@ -18,6 +18,21 @@
       "name": "pnpm",
       "source": "./plugins/pnpm",
       "description": "Package-management baseline for any Node.js work: pnpm with dependency lifecycle scripts blocked, minimum release age for new versions, pinned package manager and frozen lockfile in CI."
+    },
+    {
+      "name": "clean-architecture",
+      "source": "./plugins/clean-architecture",
+      "description": "Clean architecture layering with hexagonal (ports & adapters) boundaries, stack-agnostic: the four layers, the inward dependency rule, and where things go."
+    },
+    {
+      "name": "ddd",
+      "source": "./plugins/ddd",
+      "description": "Tactical Domain-Driven Design, stack-agnostic: ubiquitous language, aggregates as consistency boundaries, validate-on-creation, value objects, past-tense domain events, and the family pattern."
+    },
+    {
+      "name": "testing",
+      "source": "./plugins/testing",
+      "description": "Testing principles and the pragmatic TDD loop, stack-agnostic: done means tested, names as specification, AAA, test independence, behavior over implementation, rule coverage over line coverage."
     }
   ]
 }

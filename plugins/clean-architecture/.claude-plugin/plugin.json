@@ -1,0 +1,10 @@
+{
+  "name": "clean-architecture",
+  "description": "Clean architecture layering with hexagonal (ports & adapters) boundaries, stack-agnostic: the four layers, the inward dependency rule, and where things go.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Jorge Costa Maciá",
+    "email": "costamaciajorge@gmail.com"
+  },
+  "license": "MIT"
+}
