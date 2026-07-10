@@ -19,6 +19,7 @@ Each skill lives as its own plugin under `plugins/`, so you can install only wha
 | [ddd](plugins/ddd) | Tactical Domain-Driven Design, stack-agnostic and canon-anchored: ubiquitous language, aggregates, factories & hydration, value objects, validation principles, per-aggregate data accessors, domain events and domain errors. |
 | [testing](plugins/testing) | Testing principles and the pragmatic TDD loop, stack-agnostic and canon-anchored: done means tested, the test pyramid, one test file per unit, names as specification, AAA and independence, classicist test doubles, behavior over implementation, and rule coverage over line coverage. |
 | [validation-net](plugins/validation-net) | The .NET realization of the two-level validation model: FluentValidation, the three-verb creation surface (ctor hydrates, From converts, Create validates), validator Create() chains, the composite full-report rule, family exceptions with fixed codes, and use-case preconditions in Application. |
+| [logging-net](plugins/logging-net) | Application logging style for .NET with Serilog: fixed low-cardinality messages as grouping keys (never interpolation or placeholders, never failure details in the message), all data via LogContext.PushProperty, same message across levels for outcome pairs, and correlation ids in every scope. |
 
 ## Install
 
