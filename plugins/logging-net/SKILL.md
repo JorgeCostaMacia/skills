@@ -32,14 +32,28 @@ Logger.LogError(exception, "Handler failed.");
 
 ## All variable data via context
 
-`LogContext.PushProperty` in stacked `using` blocks — every property becomes queryable/filterable structured data:
+Every property becomes queryable/filterable structured data. A one-off property is a simple scope:
 
 ```csharp
-using (LogContext.PushProperty("AggregateId", aggregate.Id))
-using (LogContext.PushProperty("CorrelationId", correlationId))
 using (LogContext.PushProperty("UserId", request.UserId))
-using (LogContext.PushProperty("Request", request, destructureObjects: true))
-using (LogContext.PushProperty("OccurredAt", request.MetaOccurredAt))
+{
+    Logger.LogInformation("UserLoad");
+}
+```
+
+**Repeated or multi-property context → one `PushProperties` helper per class** — native `LogContext.Push` with `PropertyEnricher`s; no stacked `using` towers, no custom aggregators:
+
+```csharp
+private static IDisposable PushProperties(UserLoadRequest request, Guid correlationId) =>
+    LogContext.Push(
+        new PropertyEnricher("AggregateId", request.AggregateId),
+        new PropertyEnricher("CorrelationId", correlationId),
+        new PropertyEnricher("UserId", request.UserId),
+        new PropertyEnricher("Request", request, destructureObjects: true));
+```
+
+```csharp
+using (PushProperties(request, correlationId))
 {
     Logger.LogInformation("UserLoad");
 }
@@ -47,7 +61,7 @@ using (LogContext.PushProperty("OccurredAt", request.MetaOccurredAt))
 
 - `destructureObjects: true` for complex payloads — structured, not `ToString()`.
 - Query by property (`UserId="42"` in Loki/Grafana), never by message text.
-- Gotcha: alongside MassTransit, alias the import — `using LogContext = Serilog.Context.LogContext;` (MassTransit ships its own `LogContext`).
+- `PropertyEnricher` lives in `Serilog.Core.Enrichers`. Gotcha: alongside MassTransit, alias the import — `using LogContext = Serilog.Context.LogContext;` (MassTransit ships its own `LogContext`).
 
 ## Levels split the series; the message stays
 
@@ -56,6 +70,9 @@ Outcome pairs share the SAME message and differ by **level** — in Grafana the 
 - `LogInformation("UserLoad")` — success path.
 - `LogError(exception, "UserLoad")` — failure path, **exception as the first argument** (Serilog captures it structured; it never goes into the message).
 - `LogWarning(...)` — anomalies that aren't failures (skipped, retried, ignored).
+- `LogCritical(...)` — **the APPLICATION dies**: startup failure (invalid config, can't reach broker/DB during bootstrap), unrecoverable state, the host going down. A failed handler or use case is `Error`, NOT Critical — the app keeps serving. Mental test: *if the process is still handling requests after the log line, it wasn't Critical.*
+
+The severity ladder encodes **outcome scope**: Information = normal · Warning = anomaly without failure · Error = the *operation* failed · Critical = the *application* is dying.
 
 Alert recipe for free: rate of `message="UserLoad" AND level=Error` over total.
 
@@ -74,4 +91,5 @@ Cross-cutting enrichment (request logging, exception logging, environment/versio
 - ✘ `LogError($"Failed: {ex.Message}")` — failure detail in the message AND the exception lost as structured data.
 - ✘ Serializing objects into the message — that's what `destructureObjects` is for.
 - ✘ One-off phrase messages per call site ("about to start processing the thing…") — unqueryable noise; if it deserves a log, it deserves a stable event name.
-- ✘ Levels as decoration — level encodes outcome severity (Information/Warning/Error), not emphasis.
+- ✘ Levels as decoration — level encodes outcome severity (Information/Warning/Error/Critical), not emphasis.
+- ✘ `LogCritical` for a failed operation — Critical is reserved for the application dying; an operation failure is `Error`.
