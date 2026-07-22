@@ -61,6 +61,18 @@ The *format* is per school and per stack tooling — all equivalent realizations
 - Shared builders/fixtures stay close to the tests that use them — a test file reads top-to-bottom without hunting elsewhere.
 - No timing-based tests: inject the clock / control the scheduler. A sleep in a test is a flake with a countdown.
 
+## Test data: Object Mother + Builder — [canon: Meszaros; our default]
+
+Two complementary patterns build the Arrange, with a clear division of labour — reach for them instead of hand-constructing objects inline in every test:
+
+- **Object Mother** — named, canonical instances that model **domain-meaningful states**: `Invoices.Overdue()`, `Customers.Premium()`. The default entry point; most tests read exactly one. **[our convention]** reach for a mother first.
+- **Test Data Builder** — fluent, field-level **variation**: `.WithNoEmail()`, `.WithTwoItems()`. For the tweak a mother doesn't name.
+- **Compose them — the mother returns a builder**: `Customers.Premium()` yields a builder preloaded with a valid premium customer; `.Build()` for the canonical case, `.WithNoEmail().Build()` for a one-off variation. Canonical default *and* on-demand variation, with no method explosion.
+
+The guardrail: **a mother names a STATE, not a field tweak.** `Invoices.Overdue()` — yes; `Customers.PremiumButNoEmail()` — no, that's the builder's job. Once mother names start carrying `WithX`, the variation belongs in the builder. Well-segregated units (see `solid`) have few meaningful states, so the mother set stays small on its own.
+
+Concrete form and placement — static classes, naming, where the mothers/builders live — are the stack skill's call.
+
 ## Behavior over implementation — [canon: classicist school]
 
 - Verify **outputs and state changes**, not internal call sequences. Interaction-heavy tests break on refactors that change nothing observable — a test punishing improvement is failing its purpose.
