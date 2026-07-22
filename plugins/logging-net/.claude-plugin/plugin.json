@@ -1,7 +1,7 @@
 {
   "name": "logging-net",
   "description": "Application logging style for .NET with Serilog: fixed low-cardinality messages as grouping keys (never interpolation or placeholders, never failure details in the message), all data via LogContext.PushProperty, same message across levels for outcome pairs, and correlation ids in every scope.",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "author": {
     "name": "Jorge Costa Maciá",
     "email": "costamaciajorge@gmail.com"
