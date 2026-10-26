@@ -14,7 +14,7 @@ description: >-
 
 # DDD in .NET
 
-The .NET *how* of the model defined in `ddd` (load it for the *why*). Validators — how rules are written and composed — are `validation-net`'s; this skill only says where a type calls its own.
+The .NET *how* of the model defined in `ddd` (load it for the *why*). How a validator is written — rules, messages, composition — is `validation-net`'s; this skill says which validator each domain type has and how it runs it.
 
 ## The base types
 
@@ -131,9 +131,30 @@ internal sealed class Pedidos : Aggregate
 ```
 
 - The root is an `internal sealed class` deriving `Aggregate` (identity, not value semantics — so a class, not a record). Fields that change are `set`; the identity and what never changes after creation are `init`.
-- **The aggregate never calls its parts' `Create`** — that would throw on the first invalid part alone. `From` cascades through the parts' `From`/`FromOrNull`; `Create` validates the whole once (`validation-net` covers how the aggregate's validator composes its parts').
+- **The aggregate never calls its parts' `Create`** — that would throw on the first invalid part alone. `From` cascades through the parts' `From`/`FromOrNull`; `Create` validates the whole once (see *Validating the model*).
 - **The nullability of each factory call matches its property**: `XField.FromOrNull(...)` for an optional field, `XField.From(...)` for a required one. Add a field, keep both sides in step.
 - Long parameter lists go one per line (the examples above are compressed).
+
+## Validating the model
+
+Every value object and every aggregate has its own `<X>Validator` and `<X>ValidationException`, next to it in its folder.
+
+- **The validator is built with `Create()`, never resolved from DI.** A type validates inside its own static `Create`, where there is no container, and its rules are pure — there is nothing to inject. `XValidator.Create()` assembles the whole chain, and the type reaches it through one `private void Validate() => XValidator.Create().ValidateAndThrow(this);`.
+- **Only `Create` validates.** `From` and the hydration constructor never do: a composite is built from unvalidated parts, and rehydrating N rows must not re-validate them.
+- **A value object's validator `Include`s its base's** (`Include(DateTimeUtcValueObjectValidator.Create())` through the constructor) and adds the field's own rule, so the base's type checks always run. Its exception derives the base's (`DateTimeValueObjectValidationException`…).
+- **The aggregate's validator composes its parts**: one `SetValidator` per value-object property — an optional one guarded with `.When(v => v.Part is not null)` and selected as `v.Part!` — plus the aggregate's own cross-field rules. One `ValidateAndThrow` in `Create` reports every failure, with its property path, in one `<X>ValidationException`.
+
+  ```csharp
+  RuleFor(v => v.Referencia!)
+      .SetValidator(referencia)
+      .When(v => v.Referencia is not null);
+
+  RuleFor(v => v.MetaDeletedAt)                // the aggregate's own rule
+      .NotNull()
+      .When(v => !v.MetaActive.Value);
+  ```
+
+- A composite value object (two page numbers making a range) validates each part with the part's own validator plus the cross rule (`start <= end`).
 
 ## The exception family
 

@@ -7,5 +7,8 @@
     "email": "costamaciajorge@gmail.com"
   },
   "license": "MIT",
-  "dependencies": ["ddd"]
+  "dependencies": [
+    "ddd",
+    "validation-net"
+  ]
 }
