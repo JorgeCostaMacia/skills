@@ -49,6 +49,12 @@ Canon-anchored (Evans' *Domain-Driven Design*, Vernon's *Implementing DDD*): sec
 - **Every attribute of an entity is a value object** — [our convention]: the type names the concept in the ubiquitous language and gives its rule a home the day one appears, so a field with no rule today is wrapped all the same. The identity is the one named exception: it may stay a primitive where the persistence technology makes a wrapped key costly.
 - **A value object never coerces and carries no defaults** — [our convention]: an out-of-range value is rejected, not pulled into range (a page size of 5000 silently served as 1000 hides the caller's mistake), and a default is policy — it belongs at the call site, where two callers can choose differently.
 
+## Domain services — [canon]
+
+- A **domain service** holds a business operation that belongs to no entity or value object — typically a rule that spans several aggregates. It is named in the ubiquitous language, holds no state, and lives in Domain.
+- **Rare by design**: if the rule fits an aggregate, it goes in the aggregate. A model whose rules have drifted into services is anemic.
+- **Not an application service**: the application service orchestrates a use case (load, validate, execute, persist, publish) and holds no business rules; the domain service holds a rule and orchestrates nothing.
+
 ## Validation — two levels
 
 **Level 1 — intrinsic validity (invariants): the type owns it — [canon]**
