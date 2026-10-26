@@ -1,22 +1,22 @@
 ---
 name: validation-net
 description: >-
-  The .NET realization of the two-level validation model (see the `ddd` skill
-  for the principles, `ddd-net` for the factories that call these
-  validators). Use when writing or reviewing FluentValidation validators —
-  for a value object, an aggregate, a request or a query criterion —, when
-  deciding where a rule lives (type invariant vs use-case precondition),
-  wiring validators into DI, raising the typed ValidationException, or
-  mapping validation failures to ProblemDetails. It encodes: per-call
-  validators assembled with static Create() chains, composition with
+  The .NET realization of validation with FluentValidation, for anything that
+  gets validated (the two-level model's principles are in `ddd`). Use when
+  writing or reviewing FluentValidation validators — for a request, a query
+  criterion, a value object or an aggregate —, when deciding where a rule
+  lives (type invariant vs use-case precondition), wiring validators into DI
+  or assembling them without a container, raising the typed
+  ValidationException, or mapping validation failures to ProblemDetails. It
+  encodes: one validator and one exception per validated thing, per-call
+  validators from DI or static Create() chains, composition with
   Include/SetValidator, every rule evaluated (no Cascade), the rule and
-  message conventions, the factory-vs-DI rule, and level-2 preconditions in
-  Application with DI.
+  message conventions, and level-2 preconditions in Application with DI.
 ---
 
 # Validation in .NET (FluentValidation)
 
-The .NET *how* of the two-level model defined in `ddd` (load it for the *why*). **FluentValidation is the accepted core coupling** for validation — deliberate, evaluated, not to be wrapped or replaced. *When* a domain type validates — its `Create` — is `ddd-net`'s; this skill is about the validators, whatever they validate.
+The .NET *how* of the two-level model defined in `ddd` (load it for the *why*). **FluentValidation is the accepted core coupling** for validation — deliberate, evaluated, not to be wrapped or replaced. This skill covers validators for anything — a request, a query criterion, a domain type; how a domain model applies it (which validator each type builds, and when) is the domain skill's.
 
 ## The two levels, realized
 
@@ -58,7 +58,7 @@ internal sealed class FacturaValidator : AbstractValidator<Factura>
 }
 ```
 
-- **Value objects and aggregates build their validator with `Create()` — never from DI.** They validate inside a static factory, where there is no container, and their rules are pure, so there is nothing to inject: `XValidator.Create()` assembles the whole chain. Everything else — requests, query criteria — is resolved from DI the standard FluentValidation way (see *Boundary*).
+- **Two ways to obtain a validator, one shape.** Resolved from DI — the standard FluentValidation way, for anything validated where a container exists (requests, query criteria; see *Boundary*). Or assembled with `XValidator.Create()` — for validation that runs **where there is no container**, such as inside a static factory: the chain builds itself, nothing is injected. The constructor taking its ingredients is what lets the same validator serve both.
 - **Ctor receives ingredients; `Create` fabricates complete.** A validator with nothing to compose keeps a parameterless ctor and a trivial `Create() => new XValidator();`.
 - **Compose, don't repeat**: `SetValidator` brings a part's rules under its property (an optional part adds `.When(v => v.Part is not null)`); `Include` brings a validator hierarchy's rules onto the same object (a derived type including its base's — it works via contravariance). Cross-field rules are the composing validator's own.
 - One `ValidateAndThrow` reports **every** failure with its property path (`Email.Value`, `Total`) in one exception — the full report `ddd` asks for. The pattern recurses through any depth of parts.
@@ -84,7 +84,7 @@ internal sealed class FacturaValidator : AbstractValidator<Factura>
 
 ## The ValidationException
 
-`<X>ValidationException` derives the shared base — `JorgeCostaMacia.Exception`'s `ValidationException`, or the one its base type already extends (`DateTimeValueObjectValidationException`…) — and carries a **fixed GUID code** and the failure list (`ImmutableList<ValidationFailure>`). At an HTTP boundary that list becomes per-field ProblemDetails errors (`JorgeCostaMacia.Http.ProblemDetails` renders it). The rest of the domain exceptions (`NotFound`, `Exist`) are `ddd-net`'s.
+`<X>ValidationException` derives the shared base — `JorgeCostaMacia.Exception`'s `ValidationException`, or the one its base type already extends (`DateTimeValueObjectValidationException`…) — and carries a **fixed GUID code** and the failure list (`ImmutableList<ValidationFailure>`). At an HTTP boundary that list becomes per-field ProblemDetails errors (`JorgeCostaMacia.Http.ProblemDetails` renders it). The rest of a domain's exceptions (`NotFound`, `Exist`) belong to the domain skill.
 
 ## Boundary — standard FluentValidation, when there is one
 
