@@ -58,11 +58,11 @@ internal sealed class FacturaValidator : AbstractValidator<Factura>
 }
 ```
 
+- **Value objects and aggregates build their validator with `Create()` — never from DI.** They validate inside a static factory, where there is no container, and their rules are pure, so there is nothing to inject: `XValidator.Create()` assembles the whole chain. Everything else — requests, query criteria — is resolved from DI the standard FluentValidation way (see *Boundary*).
 - **Ctor receives ingredients; `Create` fabricates complete.** A validator with nothing to compose keeps a parameterless ctor and a trivial `Create() => new XValidator();`.
 - **Compose, don't repeat**: `SetValidator` brings a part's rules under its property (an optional part adds `.When(v => v.Part is not null)`); `Include` brings a validator hierarchy's rules onto the same object (a derived type including its base's — it works via contravariance). Cross-field rules are the composing validator's own.
 - One `ValidateAndThrow` reports **every** failure with its property path (`Email.Value`, `Total`) in one exception — the full report `ddd` asks for. The pattern recurses through any depth of parts.
 - **Per-call, no caching**: a validator is built for each validation (`XValidator.Create().ValidateAndThrow(x)`). Construction costs a few gen0 allocations (FluentValidation caches compiled accessors globally); a static instance is a later, profiler-driven optimization. It also keeps time bounds honest: a bound on "now" is evaluated when the validator is built, so a cached one would freeze it at process start.
-- **`Create()` chains are for what validates itself through a static factory** (value objects, aggregates — see `ddd-net`): container-free, always. Everything else — requests, query criteria — uses standard FluentValidation: constructor injection, normal DI registration (see *Boundary*).
 - Lambda style: **`v =>`** (nested scopes `v2`), not `value =>`. Explicit types throughout: `new XValidator(...)`, never `new(...)`.
 - No `new` modifier on a validator's `Create` (validators don't inherit each other; they `Include`).
 
