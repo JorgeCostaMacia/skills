@@ -43,6 +43,16 @@
       "name": "logging-net",
       "source": "./plugins/logging-net",
       "description": "Application logging style for .NET with Serilog: fixed low-cardinality messages as grouping keys (never interpolation or placeholders, never failure details in the message), all data via LogContext.PushProperty, same message across levels for outcome pairs, and correlation ids in every scope."
+    },
+    {
+      "name": "efcore-net",
+      "source": "./plugins/efcore-net",
+      "description": "EF Core conventions for any provider: value objects as ComplexProperty over .Value, keys, explicit column names, a column date kind stated in the mapping, != null in expression trees, sargable half-open date ranges, the token on every call and the FindAsync trap, scoped contexts, and the schema built from the real scripts."
+    },
+    {
+      "name": "efcore-postgres-net",
+      "source": "./plugins/efcore-postgres-net",
+      "description": "EF Core on PostgreSQL with Npgsql: xmin as a shadow row version for optimistic concurrency, the legacy timestamp switch with timestamp without time zone kept on purpose, microsecond precision, the database collation, one schema per layer, and indexes only on foreign keys."
     }
   ]
 }
