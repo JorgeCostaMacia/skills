@@ -21,7 +21,7 @@ Any Node project or tooling — front or back — uses **pnpm 12** with this con
 2. **Build scripts go through `allowBuilds`**, a map of package → `true` (may run its scripts) / `false` (reviewed, denied). With the default `strictDepBuilds: true`, an install that meets an unlisted package with build scripts **fails** — that is the review prompt, not a nuisance. Allow only what genuinely compiles or fetches a binary (esbuild, sharp…); deny the rest explicitly. Your own `package.json` scripts are not affected. (`onlyBuiltDependencies`, `neverBuiltDependencies`, `ignoredBuiltDependencies` and `onlyBuiltDependenciesFile` were removed in v11; `pnpx codemod run pnpm-v10-to-v11` migrates them.)
 3. **`minimumReleaseAge: 4320`** (3 days, in minutes) — never install a version published less than 3 days ago; trojanized releases are typically detected and pulled within that window. pnpm's own default since v11 is 1440 (1 day); set it explicitly, which also turns on `minimumReleaseAgeStrict` (no version in range old enough → resolution fails instead of silently taking a newer one). Own/trusted packages that must land immediately go in `minimumReleaseAgeExclude`.
 4. **No exotic transitive sources**: keep `blockExoticSubdeps: true` (the default) — only the root `package.json` may point at a git repo or a tarball URL.
-5. **Pin the package manager**: `"packageManager": "pnpm@<exact version>"` in package.json, so every dev and CI run the same pnpm. Moving the pin is a dependency update like any other: pick a release at least 3 days old — `pnpm self-update` does **not** apply the repo's `minimumReleaseAge`.
+5. **Pin the package manager**: `"packageManager": "pnpm@<exact version>"` in package.json, so every dev and CI run the same pnpm, and `"engines": { "pnpm": ">=12" }` as the floor: pnpm refuses to work in a project whose `engines.pnpm` it does not satisfy, so an older pnpm stops with a clear error instead of misreading v12 settings. Moving the pin is a dependency update like any other: pick a release at least 3 days old — `pnpm self-update` does **not** apply the repo's `minimumReleaseAge`.
 6. **Pin Node too — 26.** `devEngines.runtime` makes pnpm resolve the version, record it exactly (with its checksum) in the lockfile and download it when it is missing; scripts — and, since v12, a bare `node` run inside the project — use that runtime, so a machine with another Node installed still runs 26. `engines.node` states the same floor for anyone consuming the package, and CI sets up the same major (`actions/setup-node` with `node-version: 26.x`).
 7. **Lockfile committed; CI installs with `--frozen-lockfile`** (the default on CI). pnpm 12 dropped `--frozen-lockfile false`: write `--no-frozen-lockfile`.
 8. **Transitive pins via `overrides`** when a vulnerable transitive needs forcing above a bad version.
@@ -43,7 +43,8 @@ allowBuilds:              # reviewed packages only: true runs its build scripts,
 {
   "packageManager": "pnpm@12.9.1",
   "engines": {
-    "node": ">=26"
+    "node": ">=26",
+    "pnpm": ">=12"
   },
   "devEngines": {
     "runtime": {
