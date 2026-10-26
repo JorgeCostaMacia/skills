@@ -79,7 +79,7 @@ Every host registers Serilog the same way, in its `ProgramBuilder`:
 ```csharp
 if (builder.Environment.IsDevelopment())
 {
-    Serilog.Debugging.SelfLog.Enable(Console.Error);   // Serilog's own errors (a broken sink, a bad config) to the console
+    Serilog.Debugging.SelfLog.Enable(Console.Error);   // Serilog's own errors (a broken sink, a bad config)
 }
 
 builder.Services.AddSerilog((services, config) => config
