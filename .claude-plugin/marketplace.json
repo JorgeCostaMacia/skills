@@ -7,7 +7,7 @@
     {
       "name": "gitflow",
       "source": "./plugins/gitflow",
-      "description": "Jorge's GitFlow workflow: feature/bugfix/release/hotfix start & finish, SemVer tags, default merge messages, commit identity, and the phased-publish caveat."
+      "description": "A GitFlow workflow: feature/bugfix/release/hotfix start & finish, SemVer tags, default merge messages, commit identity, and the phased-publish caveat."
     },
     {
       "name": "solid",
