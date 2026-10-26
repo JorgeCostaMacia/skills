@@ -4,7 +4,7 @@ description: >-
   The .NET realization of the messaging principles with the
   JorgeCostaMacia.Bus family — what is the same whatever the transport (see
   the `messaging` skill for the why; the transport's own mechanics live in
-  `bus-kafka-net` or the RabbitMQ one). Use when writing or reviewing
+  a transport skill of its own, such as `bus-kafka-net`). Use when writing or reviewing
   message records, command handlers and event subscribers, sending and
   publishing, the retry ladder and its exclude list, the Quartz retry store,
   the contracts package's bus maps, or the host's bus composition. It
@@ -101,7 +101,7 @@ ImmutableList<TimeSpan> retry = ImmutableList.Create(
 ImmutableList<Type> exclude = ImmutableList.Create(typeof(ValidationException));
 ```
 
-- **`ValidationException` (the shared base) is always excluded**: a malformed message is parked at once, never retried. A business conflict or a concurrency failure is *not* excluded — the retry re-decides against the current state.
+- **`ValidationException` (the shared base) is always excluded**: a malformed message is parked at once, never retried. A concurrency failure is *not* excluded — the retry re-decides against the current state. A consumer whose write is not idempotent also excludes the `ExistException` a retry cannot change (see `messaging`).
 - A step of `TimeSpan.Zero` requeues at once; a positive one is **scheduled** through the retry store.
 - **The retry store is Quartz** (`JorgeCostaMacia.Bus.<Transport>.Retry.Quartz`): `AddQuartz(q => q.WithPostgresDefaults("retry", "JobsBus", "bus"))` plus `AddRetryContext()` — the `retry` scheduler, the `JobsBus` connection, tables prefixed `bus.`. The worker **only parks** retries: it never adds `AddQuartzHostedService`. **bus-jobs** is the worker that starts that scheduler and fires them. Without a retry store a delayed retry cannot be scheduled and the message is parked as terminal.
 

@@ -42,7 +42,7 @@ Every consumer is written as if each message could arrive **twice, late, or befo
 
 ## Concurrent writes
 
-Two consumers may handle messages for the same row at the same time. **The write is guarded by optimistic concurrency**: a save over a row changed since it was read fails, the message is retried, and the guard decides again against the row as it now is. A race that surfaces as a duplicate-key failure on insert resolves the same way.
+Two consumers may handle messages for the same row at the same time. **The write is guarded by optimistic concurrency**: a save over a row changed since it was read fails, the message is retried, and the guard decides again against the row as it now is. A race that surfaces as a duplicate-key failure on insert resolves the same way **when the write is idempotent** — the version travels with the data, so the retry becomes an update or a no-op. Where it is not, a duplicate key is a business fact ("already exists") that no retry will change: it is parked, not retried.
 
 ## Retries belong to the broker
 
