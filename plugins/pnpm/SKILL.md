@@ -3,45 +3,64 @@ name: pnpm
 description: >-
   Package-management baseline for ANY Node.js work, frontend or backend — use
   when creating or configuring a Node project, adding a package.json, choosing
-  a package manager, installing or updating dependencies, scaffolding frontend
-  apps or JS/TS tooling, or setting up CI for a Node repo. It mandates pnpm
-  with supply-chain hardening: dependency lifecycle scripts blocked (explicit
-  allowlist), a minimum release age for new versions, pinned package manager,
+  a package manager, installing or updating dependencies (pnpm itself
+  included), scaffolding frontend apps or JS/TS tooling, or setting up CI for
+  a Node repo. It mandates pnpm 12 with supply-chain hardening: dependency
+  build scripts denied unless reviewed (allowBuilds), a 3-day minimum release
+  age enforced strictly, no exotic transitive sources, pinned package manager and Node 26,
   and frozen lockfile in CI.
 ---
 
 # pnpm — supply-chain hardened baseline
 
-Any Node project or tooling — front or back — uses **pnpm** (v10+) with this configuration. Rationale: the npm supply-chain attacks execute via install scripts of freshly published versions; this setup cuts both vectors.
+Any Node project or tooling — front or back — uses **pnpm 12** with this configuration. Rationale: npm supply-chain attacks run through the install scripts of freshly published versions; this setup cuts both vectors.
 
 ## Rules
 
-1. **pnpm, not npm/yarn** — strict `node_modules` (no phantom dependencies) and, since v10, dependency lifecycle scripts are **not executed by default**.
-2. **Dependency `preinstall`/`postinstall` stay blocked.** Your own package.json scripts still run. Anything that genuinely needs a build step (esbuild, sharp…) goes in an explicit `onlyBuiltDependencies` allowlist — empty until something proves it needs to be there.
-3. **`minimumReleaseAge: 4320`** (3 days, in minutes; pnpm ≥ 10.16) — never install versions published less than 3 days ago; trojanized releases are typically detected and pulled within that window. Use `minimumReleaseAgeExclude` for own/trusted packages that must land immediately.
-4. **Pin the package manager**: `"packageManager": "pnpm@10.x"` in package.json (corepack) so every dev and CI run the same version.
-5. **Lockfile committed; CI installs with `--frozen-lockfile`** (pnpm's default on CI) — deterministic installs, no drift.
-6. **Transitive pins via pnpm `overrides`** when a vulnerable transitive needs forcing above a bad version.
+1. **pnpm, not npm/yarn** — strict `node_modules` (no phantom dependencies), and dependency build scripts **never run unreviewed**.
+2. **Build scripts go through `allowBuilds`**, a map of package → `true` (may run its scripts) / `false` (reviewed, denied). With the default `strictDepBuilds: true`, an install that meets an unlisted package with build scripts **fails** — that is the review prompt, not a nuisance. Allow only what genuinely compiles or fetches a binary (esbuild, sharp…); deny the rest explicitly. Your own `package.json` scripts are not affected. (`onlyBuiltDependencies`, `neverBuiltDependencies`, `ignoredBuiltDependencies` and `onlyBuiltDependenciesFile` were removed in v11; `pnpx codemod run pnpm-v10-to-v11` migrates them.)
+3. **`minimumReleaseAge: 4320`** (3 days, in minutes) — never install a version published less than 3 days ago; trojanized releases are typically detected and pulled within that window. pnpm's own default since v11 is 1440 (1 day); set it explicitly, which also turns on `minimumReleaseAgeStrict` (no version in range old enough → resolution fails instead of silently taking a newer one). Own/trusted packages that must land immediately go in `minimumReleaseAgeExclude`.
+4. **No exotic transitive sources**: keep `blockExoticSubdeps: true` (the default) — only the root `package.json` may point at a git repo or a tarball URL.
+5. **Pin the package manager**: `"packageManager": "pnpm@<exact version>"` in package.json, so every dev and CI run the same pnpm, and `"engines": { "pnpm": ">=12" }` as the floor: pnpm refuses to work in a project whose `engines.pnpm` it does not satisfy, so an older pnpm stops with a clear error instead of misreading v12 settings. Moving the pin is a dependency update like any other: pick a release at least 3 days old — `pnpm self-update` does **not** apply the repo's `minimumReleaseAge`.
+6. **Pin Node too — 26.** `devEngines.runtime` makes pnpm resolve the version, record it exactly (with its checksum) in the lockfile and download it when it is missing; scripts — and, since v12, a bare `node` run inside the project — use that runtime, so a machine with another Node installed still runs 26. `engines.node` states the same floor for anyone consuming the package, and CI sets up the same major (`actions/setup-node` with `node-version: 26.x`).
+7. **Lockfile committed; CI installs with `--frozen-lockfile`** (the default on CI). pnpm 12 dropped `--frozen-lockfile false`: write `--no-frozen-lockfile`.
+8. **Transitive pins via `overrides`** when a vulnerable transitive needs forcing above a bad version.
+9. **Settings live in `pnpm-workspace.yaml`**, where pnpm 12 checks them: an unknown key warns with the closest real name and, when the pinned pnpm is the one running, fails with `ERR_PNPM_UNRECOGNIZED_WORKSPACE_SETTINGS` — a typo in a security setting no longer passes in silence.
 
 ## Config
 
 `pnpm-workspace.yaml`:
 
 ```yaml
-minimumReleaseAge: 4320        # 3 days, in minutes
-onlyBuiltDependencies: []      # explicit allowlist; add only what proves it needs build scripts
+minimumReleaseAge: 4320   # 3 days, in minutes; explicit, so minimumReleaseAgeStrict is on
+allowBuilds:              # reviewed packages only: true runs its build scripts, false denies them
+  esbuild: true           # fetches its native binary
 ```
 
 `package.json`:
 
 ```json
 {
-  "packageManager": "pnpm@10.20.0"
+  "packageManager": "pnpm@12.9.1",
+  "engines": {
+    "node": ">=26",
+    "pnpm": ">=12"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^26",
+      "onFail": "download"
+    }
+  }
 }
 ```
 
-## When scaffolding
+Optional, stricter: `trustPolicy: no-downgrade` fails an install when a package's trust evidence (provenance, trusted publishing) drops below what its earlier releases had — the signature of a hijacked maintainer account. Exceptions go in `trustPolicyExclude` (`'pkg@1.2.3'`).
+
+## When scaffolding or updating
 
 - New Node project → this setup from the first commit, before any `pnpm add`.
-- If an install warns about skipped build scripts, do NOT blanket-enable: check the package, then either add it to `onlyBuiltDependencies` (it really compiles something) or ignore the warning (`ignoredBuiltDependencies`).
+- An install that stops on unreviewed build scripts: look at what the package's script does, then add it to `allowBuilds` as `true` (it really builds something) or `false` (it does not need to). Never `dangerouslyAllowAllBuilds`.
 - Never work around a blocked script with `pnpm rebuild` / manual script runs without the same scrutiny.
+- `pnpm outdated` lists what can move; an update still lands only versions older than `minimumReleaseAge`.
