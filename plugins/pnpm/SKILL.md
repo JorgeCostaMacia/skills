@@ -7,7 +7,7 @@ description: >-
   included), scaffolding frontend apps or JS/TS tooling, or setting up CI for
   a Node repo. It mandates pnpm 12 with supply-chain hardening: dependency
   build scripts denied unless reviewed (allowBuilds), a 3-day minimum release
-  age enforced strictly, no exotic transitive sources, pinned package manager,
+  age enforced strictly, no exotic transitive sources, pinned package manager and Node 26,
   and frozen lockfile in CI.
 ---
 
@@ -22,9 +22,10 @@ Any Node project or tooling — front or back — uses **pnpm 12** with this con
 3. **`minimumReleaseAge: 4320`** (3 days, in minutes) — never install a version published less than 3 days ago; trojanized releases are typically detected and pulled within that window. pnpm's own default since v11 is 1440 (1 day); set it explicitly, which also turns on `minimumReleaseAgeStrict` (no version in range old enough → resolution fails instead of silently taking a newer one). Own/trusted packages that must land immediately go in `minimumReleaseAgeExclude`.
 4. **No exotic transitive sources**: keep `blockExoticSubdeps: true` (the default) — only the root `package.json` may point at a git repo or a tarball URL.
 5. **Pin the package manager**: `"packageManager": "pnpm@<exact version>"` in package.json, so every dev and CI run the same pnpm. Moving the pin is a dependency update like any other: pick a release at least 3 days old — `pnpm self-update` does **not** apply the repo's `minimumReleaseAge`.
-6. **Lockfile committed; CI installs with `--frozen-lockfile`** (the default on CI). pnpm 12 dropped `--frozen-lockfile false`: write `--no-frozen-lockfile`.
-7. **Transitive pins via `overrides`** when a vulnerable transitive needs forcing above a bad version.
-8. **Settings live in `pnpm-workspace.yaml`**, where pnpm 12 checks them: an unknown key warns with the closest real name and, when the pinned pnpm is the one running, fails with `ERR_PNPM_UNRECOGNIZED_WORKSPACE_SETTINGS` — a typo in a security setting no longer passes in silence.
+6. **Pin Node too — 26.** `devEngines.runtime` makes pnpm resolve the version, record it exactly (with its checksum) in the lockfile and download it when it is missing; scripts — and, since v12, a bare `node` run inside the project — use that runtime, so a machine with another Node installed still runs 26. `engines.node` states the same floor for anyone consuming the package, and CI sets up the same major (`actions/setup-node` with `node-version: 26.x`).
+7. **Lockfile committed; CI installs with `--frozen-lockfile`** (the default on CI). pnpm 12 dropped `--frozen-lockfile false`: write `--no-frozen-lockfile`.
+8. **Transitive pins via `overrides`** when a vulnerable transitive needs forcing above a bad version.
+9. **Settings live in `pnpm-workspace.yaml`**, where pnpm 12 checks them: an unknown key warns with the closest real name and, when the pinned pnpm is the one running, fails with `ERR_PNPM_UNRECOGNIZED_WORKSPACE_SETTINGS` — a typo in a security setting no longer passes in silence.
 
 ## Config
 
@@ -40,7 +41,17 @@ allowBuilds:              # reviewed packages only: true runs its build scripts,
 
 ```json
 {
-  "packageManager": "pnpm@12.9.1"
+  "packageManager": "pnpm@12.9.1",
+  "engines": {
+    "node": ">=26"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^26",
+      "onFail": "download"
+    }
+  }
 }
 ```
 
