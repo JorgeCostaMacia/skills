@@ -8,8 +8,8 @@ description: >-
   invariant lives; designing how aggregates are created, hydrated, validated
   and persisted; or defining what a module/bounded context owns — in any
   backend language or framework. Every section is marked [canon] or
-  [our convention]; stack-specific mechanics (validation library, error
-  vehicle, event dispatching, accessor form) live in the stack skills.
+  [our convention]; the concrete realization (base types, factories, mapping,
+  error vehicle) lives in the stack skills.
 ---
 
 # Domain-Driven Design (tactical)
@@ -22,15 +22,23 @@ Canon-anchored (Evans' *Domain-Driven Design*, Vernon's *Implementing DDD*): sec
 - One concept, one name, everywhere: code, contracts, storage, logs, conversation. If the business renames a concept, the code follows.
 - If you can't name it in domain terms, you don't understand it yet — ask first, model later.
 
+## Entities — [canon]
+
+- An entity is defined by its **identity**, not its attributes: it stays the same entity through every change of state, and two entities are the same when their identities are, whatever their other values.
+- The identity is assigned once and never changes.
+- State changes through **behaviour that keeps the invariants** — not through setters that let a caller break them.
+
 ## Aggregates — [canon]
 
 - An aggregate is the **consistency boundary**: loaded, validated and persisted as a unit; the thing whose invariants must hold at every save.
 - Keep them **small**: if two clusters of fields change for different business reasons, that's two aggregates. Reference other aggregates by identity, not by object graph.
+- The **root** is the one entity outsiders hold: the entities inside are reached through it, and only the root is loaded, saved and referenced from outside.
 - Aggregates announce what happened through **domain events** (see below); no events escape a failed operation.
 
 ## Creation & hydration — [canon: the Factory pattern]
 
-- **Creation always goes through a factory** (`Create`…) that normalizes input and **validates before returning** — an object cannot be *created* invalid. Factories are DDD's answer to guarded construction.
+- **Creation always goes through a factory** (`Create`…) that converts the input and **validates before returning** — an object cannot be *created* invalid. Factories are DDD's answer to guarded construction.
+- **Converting is not normalizing** — [our convention]: a factory alters a value only where a rule of the domain says so (trimming a name the business defines as trimmed), and **never coerces** an invalid value into a valid one. A layer whose job is fidelity to a source keeps every value as it came.
 - **Hydration is a separate path**: a plain constructor reserved for **reconstitution** — infrastructure (ORM, deserializer) restoring already-validated state. Hydration is *recovery*, not *entry*; it doesn't re-validate. (Evans distinguishes creation from reconstitution explicitly.)
 
 ## Value objects — [canon]
@@ -38,7 +46,8 @@ Canon-anchored (Evans' *Domain-Driven Design*, Vernon's *Implementing DDD*): sec
 - **Wrap primitives that carry rules** — email, money, quantity, identifier: the rule belongs to the type, not scattered across callers.
 - Immutable; equality **by value within the type** (two Emails with equal value are equal; an Email never equals a Name with the same string).
 - Conversion is one-directional: VO → primitive is cheap; **primitive → VO only through the factory**.
-- Values with no rules stay plain primitives — don't wrap for ceremony.
+- **Every attribute of an entity is a value object** — [our convention]: the type names the concept in the ubiquitous language and gives its rule a home the day one appears, so a field with no rule today is wrapped all the same. The identity is the one named exception: it may stay a primitive where the persistence technology makes a wrapped key costly.
+- **A value object never coerces and carries no defaults** — [our convention]: an out-of-range value is rejected, not pulled into range (a page size of 5000 silently served as 1000 hides the caller's mistake), and a default is policy — it belongs at the call site, where two callers can choose differently.
 
 ## Validation — two levels
 
