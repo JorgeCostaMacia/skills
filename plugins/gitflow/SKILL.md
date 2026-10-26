@@ -77,6 +77,6 @@ Commit with **the identity git already has** — don't set one in the command. I
 
 ## Phased-publish caveat (the one real reason to deviate)
 
-A release sometimes **cannot** fit a single `release/X` branch: when packages reference each other via `PackageReference` (NuGet), a dependent can only build against an **already-published** version. So a tiered library (e.g. tier0 → tier1 → top) must publish in **separate pushes**, waiting for each tier to index on the registry before the next references it — which one release branch can't span in time.
+A release sometimes **cannot** fit a single `release/X` branch: when packages depend on each other through a registry (NuGet, npm…), a dependent can only build against an **already-published** version. So a tiered library (e.g. tier0 → tier1 → top) must publish in **separate pushes**, waiting for each tier to index on the registry before the next references it — which one release branch can't span in time.
 
-If you hit this, **raise it with the user BEFORE proceeding** and agree the plan. Do **not** silently switch to ad-hoc per-tier `develop→main` merges (that exact deviation, in a real NuGet rollout, is what this skill exists to prevent). When phased, the milestone tag still lands on `main` at the end via a normal annotated tag + atomic push.
+If you hit this, **raise it with the user BEFORE proceeding** and agree the plan. Do **not** silently switch to ad-hoc per-tier `develop→main` merges (that exact deviation, in a real package rollout, is what this skill exists to prevent). When phased, the milestone tag still lands on `main` at the end via a normal annotated tag + atomic push.
