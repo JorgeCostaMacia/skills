@@ -51,7 +51,7 @@ The conventions every repo follows; how MSBuild itself works is the `dotnet-msbu
 <WarningsAsErrors>$(WarningsAsErrors);NU1903;NU1904</WarningsAsErrors>
 ```
 
-Every restore audits direct **and** transitive packages and reports any severity; high and critical (`NU1903` / `NU1904`) fail the build instead of hiding in a log. The fix is a version bump (or an override of the transitive package in CPM), never `NoWarn`.
+Every restore audits direct **and** transitive packages (`all` is already the default from `net10.0`; it is stated so it holds on older targets) and reports every severity (`low`). With `TreatWarningsAsErrors` on, **every reported advisory fails the build** — `NU1901` to `NU1904` alike; the explicit `NU1903;NU1904` only pins the two that must stay errors should the blanket setting ever go. The fix is a version bump, or an override of the transitive package in CPM. An advisory analyzed and judged not to apply is excluded with a `NuGetAuditSuppress` item naming its advisory URL — the last resort, and the only sanctioned one; never `NoWarn`.
 
 ## global.json
 

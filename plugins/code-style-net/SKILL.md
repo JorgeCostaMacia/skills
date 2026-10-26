@@ -6,8 +6,9 @@ description: >-
   creation, collections, braces, parameter and argument lists, naming,
   modifiers, null checks, comments, file encoding and line endings, or when
   a build fails on a style rule. It encodes: explicit types (no var, no
-  target-typed new(), no collection expressions), braces always, one
-  parameter or argument per line from two up, the naming and modifier
+  target-typed new(), no collection expressions) as a stated departure from
+  Microsoft's defaults, braces always, a 120-column width with all-or-nothing
+  wrapping and growing lists kept vertical, the naming and modifier
   conventions, `is null` outside expression trees, comments only where the
   code cannot speak, CRLF, `dotnet format` before committing, and the strict
   gates that make all of it a build error.
@@ -17,9 +18,11 @@ description: >-
 
 The style is **enforced, not suggested**: `.editorconfig` + `EnforceCodeStyleInBuild` + `TreatWarningsAsErrors` turn a violation into a build error, and `dotnet format --verify-no-changes` must exit 0. What no analyzer catches is spelled out below — that part is on whoever writes the code, generators included.
 
-## Explicit types
+## Explicit types — a deliberate departure from Microsoft's defaults
 
-- **No `var`.** `PedidosAggregate aggregate = …`, `List<Command> commands = …`.
+Microsoft's own C# conventions recommend `var` where the type is evident, the concise `new()` where the variable's type is already written, and collection expressions `[…]` for every collection. This style turns the three off — with the `.editorconfig` knobs Roslyn provides for the first two (`csharp_style_var_*`, `dotnet_style_prefer_collection_expression`) and a CI grep for the third — because the code is read without an IDE: in a diff, a review or a generated file, a spelled-out type is the only type the reader gets. Everything else about layout follows those same conventions: Allman braces, four spaces, one statement and one declaration per line, a break before a binary operator.
+
+- **No `var`.** `Pedidos aggregate = …`, `List<Command> commands = …`.
 - **No target-typed `new()`** — `new PedidosExtractService(context)`, never `new(context)`. The analyzer can't flag it; a CI grep guard does:
 
   ```bash
@@ -31,9 +34,9 @@ The style is **enforced, not suggested**: `.editorconfig` + `EnforceCodeStyleInB
 
 ## Shape
 
-- **Braces always**, opening brace on its own line.
+- **Braces always**, opening brace on its own line; an empty body may close on the same line (`: base(value) { }`, `private Pedidos() { }`).
 - **A blank line before `return`** (unless it is the block's only statement).
-- **One parameter or argument per line from two up** — method and constructor declarations, calls, `base(…)` (with `) : base(…)` on its own line), factory calls, every `new …Event(…)`. A one-parameter list stays on its line. No analyzer enforces it, and `dotnet format` won't wrap a long line — a generator that emits one-liners is how a repo drifts.
+- **120 columns is the reference width.** A list — parameters, arguments, an initializer, a chain of `&&`/`||` — is written **all on one line or all vertical, never mixed**: one element per line, `) : base(…)` on its own line, the break **before** a binary operator. It goes vertical when it doesn't fit, and **lists that grow stay vertical even when they fit** — method and constructor declarations, the message and exception constructors, `Create`/`From` calls, every `new …Event(…)` — so adding a field changes one line. A pair that never grows stays on its line: a fixed-arity call (`Send(commands, transport, token)`, `PushProperty(name, value)`) or a two-parameter declaration whose parameters are the thing itself (a range's `start` and `end`, a context's `services` and `configuration`). A single expression with no natural break (a route constant, an interpolated string) may exceed the width. No tool enforces any of this — `dotnet format` doesn't wrap — so it is on whoever writes the code, generators included; the mechanical version is CSharpier, which collapses whatever fits its width, and is adopted only accepting that.
 - Expression-bodied members (`=>`) for one-liners; a block when there is more than one statement.
 - Prefer a `using` over full qualification; `global using`s only for what every file needs.
 
