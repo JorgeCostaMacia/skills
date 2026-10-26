@@ -43,6 +43,21 @@
       "name": "logging-net",
       "source": "./plugins/logging-net",
       "description": "Application logging style for .NET with Serilog: fixed low-cardinality messages as grouping keys (never interpolation or placeholders, never failure details in the message), all data via LogContext.PushProperty, same message across levels for outcome pairs, and correlation ids in every scope."
+    },
+    {
+      "name": "messaging",
+      "source": "./plugins/messaging",
+      "description": "Asynchronous messaging principles for any stack and broker: commands vs events, contracts with the major in the topic, every message assumed duplicated and out of order, the version in the data with a strict newer-wins guard, optimistic concurrency on the write, retries owned by the broker, and malformed messages parked, not retried."
+    },
+    {
+      "name": "bus-net",
+      "source": "./plugins/bus-net",
+      "description": "The .NET realization of the messaging principles with the JorgeCostaMacia.Bus family, for every transport: Command/Event records with their two constructors, thin CommandHandler/EventSubscriber adapters, Send/Publish with the incoming transport, the standard retry ladder with ValidationException excluded, retries parked in Quartz and run by bus-jobs, routes and the producer/admin/consumer maps."
+    },
+    {
+      "name": "bus-kafka-net",
+      "source": "./plugins/bus-kafka-net",
+      "description": "The Kafka transport of the JorgeCostaMacia.Bus family: topics as routes with the contracts major, partitions in the admin map, no message key, consumer groups named after the handler, the .error and .fault topics, the Bus configuration sections with per-service credentials, startup throttling, and health checks."
     }
   ]
 }
