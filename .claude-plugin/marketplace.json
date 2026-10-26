@@ -25,6 +25,11 @@
       "description": "Clean architecture layering with hexagonal (ports & adapters) boundaries, stack-agnostic and canon-anchored: the four layers inside each bounded context, the inward dependency rule, ports for external capabilities, and the name mapping to Evans, Uncle Bob, Microsoft and Jason Taylor."
     },
     {
+      "name": "clean-architecture-net",
+      "source": "./plugins/clean-architecture-net",
+      "description": "The .NET realization of clean architecture: one project per module with its four layer folders, internal by default with one public *Context per module, the static Add<Module>Context / Map<Module>…Context composition, the host as composition only (ProgramBuilder / ProgramApplication), the published Contracts and Query and the internal Shared kernels, and the composition test."
+    },
+    {
       "name": "ddd",
       "source": "./plugins/ddd",
       "description": "Tactical Domain-Driven Design, stack-agnostic and canon-anchored: ubiquitous language, aggregates, factories & hydration, value objects, validation principles, per-aggregate data accessors, domain events and domain errors."
