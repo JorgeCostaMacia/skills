@@ -71,7 +71,7 @@ Jorge's `gitflow-vscode` tool does the pushes itself (start: `push -u`; finish: 
 
 ## Commit identity
 
-Commits use Jorge's **personal** identity (`Jorge Costa Maciá <costamaciajorge@gmail.com>`), **never** a work account. **No** `Co-Authored-By` / Claude / Anthropic trailer in any commit or message.
+Commit with **the identity git already has** — don't set one in the command. If one has to be given explicitly, take the repository's own (`git config user.name` / `git config user.email` run inside it) and use that — a repository can set its own identity (`git config --local`) over the global one. **No** `Co-Authored-By` / Claude / Anthropic trailer in any commit or message.
 
 ## Phased-publish caveat (the one real reason to deviate)
 
