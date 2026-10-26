@@ -88,7 +88,7 @@ private static new DateTime Convert(DateTime value)
 
 - **A VO never pulls a value into range.** Out of range is a caller's mistake and its `Create` throws the typed exception.
 - **No `Default` and no public `Max`.** A default is call-site policy; a public bound is an invitation to clamp against it. The bound lives as a literal in the validator, pinned by two tests either side (`Create(1000)` accepted, `Create(1001)` rejected) so it cannot drift.
-- **A base rejects only what is not the type.** Policy (a range, a format, a closed list) lives in the derived VO's validator.
+- **A base rejects only what is not the type** — and most bases check nothing (`validation-net` lists what each one does). Policy (not empty, a range, a format, a closed list) lives in the derived VO's validator.
 - A bound on "now" is captured when the validator is constructed — per `Create` today. Cache a validator in a static and the clock freezes at process start.
 
 ### A composite value object
@@ -169,6 +169,7 @@ Every value object and every aggregate has its own `<X>Validator` and `<X>Valida
   ```
 
 - A composite value object (two page numbers making a range) validates each part with the part's own validator plus the cross rule (`start <= end`).
+- **Which layer holds a content rule** follows `ddd`: a landing layer's payload VO has a validator that only `Include`s its base's, and the field's rule — a length, a format — lives in the standardizing layer's VO; the landing layer's own rules are on its identity and `Meta*` fields.
 
 ## The exception family
 

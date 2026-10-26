@@ -36,7 +36,15 @@ Microsoft's own C# conventions recommend `var` where the type is evident, the co
 
 - **Braces always**, opening brace on its own line; an empty body may close on the same line (`: base(value) { }`, `private Pedidos() { }`), and an empty type body is the `;` form (`public sealed class PostgreSqlCollection : ICollectionFixture<PostgreSqlFixture>;`).
 - **A blank line before `return`** (unless it is the block's only statement).
-- **120 columns is the reference width.** A list — parameters, arguments, an initializer, a chain of `&&`/`||` — is written **all on one line or all vertical, never mixed**: one element per line, `) : base(…)` on its own line, the break **before** a binary operator. It goes vertical when it doesn't fit, and **lists that grow stay vertical even when they fit** — method and constructor declarations, the message and exception constructors, `Create`/`From` calls, every `new …Event(…)` — so adding a field changes one line. A pair that never grows stays on its line: a fixed-arity call (`Send(commands, transport, token)`, `PushProperty(name, value)`) or a two-parameter declaration whose parameters are the thing itself (a range's `start` and `end`, a context's `services` and `configuration`). A single expression with no natural break (a route constant, an interpolated string) may exceed the width. No tool enforces any of this — `dotnet format` doesn't wrap — so it is on whoever writes the code, generators included; the mechanical version is CSharpier, which collapses whatever fits its width, and is adopted only accepting that.
+- **120 columns is the reference width, and a list is all on one line or all vertical — never mixed** (one element per line, `) : base(…)` on its own line, the break **before** a binary operator). Which lists go vertical is decided by their kind, so it can be checked:
+
+  | List | Rule |
+  | --- | --- |
+  | A method or constructor **declaration** with two or more parameters | **Vertical always**, even when it fits — except a pair that is the thing itself (a range's `start` and `end`, a context's `services` and `configuration`) |
+  | The **construction** of a message, event, exception or domain object: `new …Event(…)`, `) : base(…)`, `Create(…)` / `From(…)` | **Vertical always**, even when it fits: these are the lists that grow, so adding a field changes one line |
+  | Any other call, initializer or boolean chain | **By width**: one line when it fits in 120, vertical when it doesn't (`Send(commands, transport, token)` and `PushProperty(name, value)` stay on their line) |
+
+  A single expression with no natural break (a route constant, an interpolated string) may exceed the width. No tool enforces any of this — `dotnet format` doesn't wrap — so it is on whoever writes the code, generators included; the mechanical version is CSharpier, which collapses whatever fits its width, and is adopted only accepting that.
 - Expression-bodied members (`=>`) for one-liners; a block when there is more than one statement.
 - Prefer a `using` over full qualification; `global using`s only for what every file needs.
 
@@ -53,7 +61,7 @@ The `.editorconfig` turns these into build errors, so they are stated here only 
 
 ## Modifiers
 
-- Messages: `public sealed record`. Value objects: `internal sealed record`. Aggregates, services, handlers, validators: `internal sealed class`. Composition contexts: `public static class` (the module's) / `internal static class` (its layers').
+- Messages: `public sealed record`. Value objects: `internal sealed record`. Aggregates, services, handlers, validators: `internal sealed class`. The `DbContext`: `internal class`, not sealed (see `efcore-net`). Composition contexts: `public static class` (the module's) / `internal static class` (its layers').
 - Modifier order follows the `.editorconfig` (`public, private, protected, internal, file, static, … new, …, override, readonly, …, async`).
 
 ## Null and booleans

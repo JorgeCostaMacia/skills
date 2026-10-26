@@ -60,6 +60,7 @@ internal sealed class FacturaValidator : AbstractValidator<Factura>
 
 - **Two ways to obtain a validator, one shape.** Resolved from DI — the standard FluentValidation way, for anything validated where a container exists (requests, query criteria; see *Boundary*). Or assembled with `XValidator.Create()` — for validation that runs **where there is no container**, such as inside a static factory: the chain builds itself, nothing is injected. The constructor taking its ingredients is what lets the same validator serve both.
 - **Ctor receives ingredients; `Create` fabricates complete.** A validator with nothing to compose keeps a parameterless ctor and a trivial `Create() => new XValidator();`.
+- **`RaiseValidationException` is not optional.** Without the override FluentValidation throws its own `ValidationException`, which is *not* `JorgeCostaMacia.Exception`'s base — the one a bus retry policy excludes — so a malformed message would climb the whole retry ladder instead of being parked.
 - **Compose, don't repeat**: `SetValidator` brings a part's rules under its property (an optional part adds `.When(v => v.Part is not null)`); `Include` brings a validator hierarchy's rules onto the same object (a derived type including its base's: the documentation only promises `Include` for the same type; across the hierarchy it works through `IValidator<in T>`'s contravariance, and the suites pin it). Cross-field rules are the composing validator's own.
 - One `ValidateAndThrow` reports **every** failure with its property path (`Email.Value`, `Total`) in one exception — the full report `ddd` asks for. The pattern recurses through any depth of parts.
 - **Per-call, no caching**: a validator is built for each validation (`XValidator.Create().ValidateAndThrow(x)`). Construction costs a few gen0 allocations (FluentValidation caches compiled accessors globally), so a cached static instance is at most a later, profiler-driven optimization — and never for a validator with a bound on "now": that bound is evaluated when the validator is built, and a cached one would freeze it at process start.
@@ -69,7 +70,7 @@ internal sealed class FacturaValidator : AbstractValidator<Factura>
 ## Writing the rules
 
 - **No `Cascade(CascadeMode.Stop)`.** Every rule runs, so an empty value may report two failures (`NotEmpty` and the `Must`) — accepted. A validator can be included by others; it must not decide how a chain it is part of stops.
-- **A base validator rejects only what is not the type** (not empty, a real email, a real IPv4); policy — a range, a format, a closed list — lives in the validator of the thing that has it.
+- **A base validator rejects only what is not the type — and most check nothing at all.** `StringValueObjectValidator`, `Int`, `Long`, `Decimal`, `Double`, `Float`, `Bool` and `Byte` carry no rule (an empty string passes); `Uuid` is not empty; `DateTime` is after 1900 and at most a century ahead; `PageNumber` / `PageSize` are above zero; `Email`, `Ipv4`, `Json` and `Uri` check their format. Policy — not empty, a range, a closed list — lives in the validator of the thing that has it, never assumed from the base.
 - **Bounds are literals in the rule**, never a public constant to clamp against, and they are pinned by two tests either side.
 - **Messages**: a custom check names its rule and says what was expected:
 

@@ -106,7 +106,7 @@ ImmutableList<TimeSpan> retry = ImmutableList.Create(
 ImmutableList<Type> exclude = ImmutableList.Create(typeof(ValidationException));
 ```
 
-- **`ValidationException` (the shared base) is always excluded**: a malformed message is parked at once, never retried. A concurrency failure is *not* excluded — the retry re-decides against the current state. A consumer whose write is not idempotent also excludes the `ExistException` a retry cannot change (see `messaging`).
+- **`ValidationException` (the shared base, `JorgeCostaMacia.Exception.Domain`) is always excluded**: a malformed message is parked at once, never retried. FluentValidation's own `ValidationException` is not that base: a validator that doesn't override `RaiseValidationException` throws the wrong one, and its message climbs the ladder. A concurrency failure is *not* excluded — the retry re-decides against the current state. A consumer whose write is not idempotent also excludes the `ExistException` a retry cannot change (see `messaging`).
 - A step of `TimeSpan.Zero` requeues at once; a positive one is **scheduled** through the retry store.
 - **The retry store is Quartz**: `AddQuartz(q => q.WithPostgresDefaults("retry", "JobsBus", "bus"))` (`WithPostgresDefaults` is `JorgeCostaMacia.Quartz`'s) plus `AddRetryContext()` from `JorgeCostaMacia.Bus.<Transport>.Retry.Quartz` — the `retry` scheduler, the `JobsBus` connection, tables prefixed `bus.`. The worker **only parks** retries: it never adds `AddQuartzHostedService`. **bus-jobs** is the worker that starts that scheduler and fires them. Without a retry store a delayed retry cannot be scheduled and the message is parked as terminal.
 

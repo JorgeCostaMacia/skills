@@ -71,6 +71,7 @@ Canon-anchored (Evans' *Domain-Driven Design*, Vernon's *Implementing DDD*): sec
 **How the rules are held — [our convention]**
 
 - Each rule is defined **once**, in the type's own **composable validator**; the factory invokes it (level 1), and boundary validators (request/aggregate) **compose** the validators of their parts to return the **complete list of failures, per field, in one pass** — nothing invalid travels past the boundary, and errors never drip one construction at a time.
+- **[our convention] A content rule lives once, in the layer that owns the content.** In a pipeline of layers — a landing layer, a standardizing layer, a store — the standardizing layer holds the content rules; a landing layer validates only what its own infrastructure needs (the identity, its own metadata) and keeps the content as it came. The two-level table says what *kind* of rule something is; this says *which layer* holds it.
 - Multiple checkpoints, one source of rules — defense in depth, not duplication. *How* rules compose (declared constraints with collected violations, external composable validators…) is the **stack skill's decision** — judge designs against these principles, not against a particular mechanism.
 
 ## Data access — [canon: the repository role]

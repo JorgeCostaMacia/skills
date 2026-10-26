@@ -16,10 +16,11 @@ description: >-
 
 # EF Core in .NET
 
-How the model meets the store, for any provider. The per-aggregate `DbContext` as the aggregate's accessor is `ddd-net`'s; the provider's types, concurrency token and quirks are its own skill's (`efcore-postgres-net`).
+How the model meets the store, for any provider. The per-aggregate `DbContext` as the aggregate's accessor is `ddd-net`'s; the provider's types, concurrency token and quirks are its own skill's (`efcore-postgres-net`). For query **performance** — N+1, tracking, keyset paging, plans — use `optimizing-ef-core-queries` from the dotnet/skills marketplace; two of its remedies yield to the rules here: no `ExecuteUpdate` / `ExecuteDelete` in production code, and indexes only where the provider skill says (foreign keys).
 
 ## Mapping
 
+- **The context's shape is the same everywhere**: `internal class` (not sealed), `virtual` `DbSet`s, and both a parameterless constructor and the `DbContextOptions<T>` one — the shape EF's design-time tooling expects, kept uniform across the family.
 - **One `DbContext` per aggregate**, configured in `OnModelCreating` with one `Entity<X>(entity => …)` block: the table (`ToTable("x", "<schema>")`), the key with a named constraint (`HasKey(e => e.Id).HasName("pk_x")`), then every property — **every column named explicitly** (`HasColumnName("snake_case")`), so a renamed property never renames a column.
 - **Value objects map as `ComplexProperty` over their `.Value`**, `IsRequired(false)` on the optional ones (an optional complex type needs EF Core 10 or later):
 
@@ -37,6 +38,7 @@ How the model meets the store, for any provider. The per-aggregate `DbContext` a
 - **Keys.** A complex property cannot be a key. The identity stays a primitive, or it is a VO mapped with a value converter (`HasConversion`), in which case queries compare the whole VO (`e.Id == id`) and `FindAsync` takes the VO.
 - **What a column means belongs to the mapping**, not to the value object: a converter such as `HasConversion(v => v, v => DateTime.SpecifyKind(v, DateTimeKind.Utc))` tags the dates this layer itself wrote in UTC. Never put it on a column whose zone this layer doesn't know — a source's dates keep the kind they have.
 - A new column goes into the model **and** the schema scripts together.
+- **The model declares no index.** `HasIndex` would only matter to `EnsureCreated`, which is never used; indexes live in the schema scripts, and which ones exist is the provider skill's rule.
 
 ## Querying
 
