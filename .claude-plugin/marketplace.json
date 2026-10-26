@@ -30,6 +30,11 @@
       "description": "Tactical Domain-Driven Design, stack-agnostic and canon-anchored: ubiquitous language, aggregates, factories & hydration, value objects, validation principles, per-aggregate data accessors, domain events and domain errors."
     },
     {
+      "name": "ddd-net",
+      "source": "./plugins/ddd-net",
+      "description": "The .NET realization of tactical DDD: the JorgeCostaMacia.* base types, value objects with their four factories and Convert, no coercion or defaults, aggregates (From cascades, Create seals), the exception family with fixed codes, events collected on the root, and one DbContext per aggregate as its accessor."
+    },
+    {
       "name": "testing",
       "source": "./plugins/testing",
       "description": "Testing principles and the pragmatic TDD loop, stack-agnostic and canon-anchored: done means tested, the test pyramid, one test file per unit, names as specification, AAA and independence, classicist test doubles, behavior over implementation, and rule coverage over line coverage."
