@@ -35,6 +35,11 @@
       "description": "Testing principles and the pragmatic TDD loop, stack-agnostic and canon-anchored: done means tested, the test pyramid, one test file per unit, names as specification, AAA and independence, classicist test doubles, behavior over implementation, and rule coverage over line coverage."
     },
     {
+      "name": "testing-net",
+      "source": "./plugins/testing-net",
+      "description": "The .NET realization of the testing principles: xUnit v3 on Microsoft.Testing.Platform, test project layout and shared props, InternalsVisibleTo, naming, TestContext cancellation (xUnit1051), Testcontainers fixtures built from the repo's own scripts, test-data helpers, the clock, the host composition test, WebApplicationFactory host tests with hand-written fakes, and running the suites."
+    },
+    {
       "name": "validation-net",
       "source": "./plugins/validation-net",
       "description": "The .NET realization of the two-level validation model: FluentValidation, the three-verb creation surface (ctor hydrates, From converts, Create validates), validator Create() chains, the composite full-report rule, family exceptions with fixed codes, and use-case preconditions in Application."
