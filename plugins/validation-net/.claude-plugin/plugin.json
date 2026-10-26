@@ -6,5 +6,8 @@
     "name": "Jorge Costa Maciá",
     "email": "costamaciajorge@gmail.com"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": [
+    "ddd"
+  ]
 }
