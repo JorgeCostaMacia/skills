@@ -60,6 +60,17 @@ The four layers live **inside** each bounded context — self-contained, includi
 - A small app *is* one bounded context: same rule, the layers live inside it, keeping the context's logic separate from the bootstrap.
 - How contexts and layers map to projects, packages or folders is **packaging — the stack skill's decision**.
 
+### How contexts relate — [canon: Evans' context map]
+
+Contexts never reach into each other; how they do relate is chosen per pair, from Evans' strategic patterns. Two carry this architecture:
+
+- **Published Language** — the default between contexts: each context publishes its messages (commands, events, their routes) as a **contract** of its own, versioned on its own, and the others integrate only through it. Consumers depend on the contract, never on the context's runtime.
+- **Shared Kernel** — the exception, inside **one system**: the small part of the model several of its contexts agree to share — a common rule, conversion or value — because a copy per context would drift.
+  - **Small and explicit**: only what more than one context genuinely needs; what belongs to one stays in it. Not a dumping ground for "utilities".
+  - **Changed with every user in mind**: a change to the kernel is a change to every context that uses it.
+  - **Internal**: never published to outside consumers — they integrate through the Published Language.
+  - [our convention] Layered like any context (its rules in Domain, a shared adapter in Infrastructure) and split **one shared module per concern**, never one bag for everything.
+
 ## The hexagonal lens — [canon: Cockburn]
 
 Hexagonal doesn't name layers — it splits the world into **inside** (your model and use cases) and **outside** (everything else), connected through **ports**:

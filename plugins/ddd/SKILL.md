@@ -51,7 +51,7 @@ Canon-anchored (Evans' *Domain-Driven Design*, Vernon's *Implementing DDD*): sec
 
 ## Domain services — [canon]
 
-- A **domain service** holds a business operation that belongs to no entity or value object — typically a rule that spans several aggregates. It is named in the ubiquitous language, holds no state, and lives in Domain — of its own context, or of the **shared kernel** when several contexts apply the same rule (see below).
+- A **domain service** holds a business operation that belongs to no entity or value object — typically a rule that spans several aggregates. It is named in the ubiquitous language, holds no state, and lives in Domain — of its own context, or of the **shared kernel** when several contexts apply the same rule (a strategic pattern: see `clean-architecture`).
 - **Rare by design**: if the rule fits an aggregate, it goes in the aggregate. A model whose rules have drifted into services is anemic.
 - **Not an application service**: the application service orchestrates a use case (load, validate, execute, persist, publish) and holds no business rules; the domain service holds a rule and orchestrates nothing.
 
@@ -95,11 +95,3 @@ Canon-anchored (Evans' *Domain-Driven Design*, Vernon's *Implementing DDD*): sec
 
 - A module owns its model: its aggregates, its language, its rules. Other modules integrate through its **published contracts** (events, commands), never by reaching into its internals.
 - The same business word may mean different things in different contexts — that's two concepts; don't force one shared model.
-
-**Shared kernel — [canon: Evans]**
-
-- The small part of the model that several contexts **of one system** agree to share — a common rule, conversion or value. It exists because duplicating that piece in every context would let the copies drift.
-- **Small and explicit**: only what more than one context genuinely needs; what belongs to one context stays in it. It is not a dumping ground for "utilities".
-- **Changed with every user in mind**: a change to the kernel is a change to every context that uses it.
-- **Internal**: it is never published to outside consumers — they integrate through the contracts. It is shared code within one system, not an integration surface.
-- [our convention] It is layered like any context — its rules in Domain, a shared adapter in Infrastructure — and split **one shared module per concern** rather than one bag for everything.
