@@ -15,7 +15,7 @@ description: >-
 
 # GitFlow
 
-This mirrors the `gitflow-vscode` extension. Follow it **from the start** of any branching/release work. Never improvise direct `develop→main` merges or bolt a tag on at the end.
+This mirrors the [`gitflow-vscode`](https://github.com/JorgeCostaMacia/gitflow-vscode) extension; when in doubt, its source is the reference. Follow it **from the start** of any branching/release work. Never improvise direct `develop→main` merges or bolt a tag on at the end.
 
 ## Branch model
 
@@ -36,34 +36,36 @@ Branch prefixes are **only** `feature` / `bugfix` / `release` / `hotfix`. Never 
 
 ## Procedures
 
-Use `git merge --no-ff --no-edit` so the **default** merge message is kept (`Merge branch '<x>'`) — never pass `-m`. This keeps GitHub Actions run titles uniform.
+Use `git merge --no-ff --no-edit` so the **default** merge message is kept (`Merge branch '<x>'`) — never pass `-m`. This keeps GitHub Actions run titles uniform. A merge that conflicts is aborted (`git merge --abort`), leaving the repository as it was. The main branch is `main`, or `master` where that is the one that exists.
 
 ### Feature / Bugfix start
 1. Validate `<name>`.
-2. `git checkout -b feature/<name>-<ts> develop` (timestamp `<ts>` = `YYYYMMDDHHmm`; `bugfix/` for bugfix).
-3. Publish for backup: `git push -u origin <branch>` (see "Pushing" below).
+2. Working tree clean. `git checkout develop && git pull`.
+3. `git checkout -b feature/<name>-<ts>` (timestamp `<ts>` = `YYYYMMDDHHmm`, local time; `bugfix/` for bugfix).
+4. Publish for backup: `git push -u origin <branch>` (see "Pushing" below).
 
 ### Feature / Bugfix finish
 1. Working tree clean; branch exists.
-2. `git checkout develop`
+2. `git checkout develop && git pull`
 3. `git merge --no-ff --no-edit <branch>`
-4. Delete: `git branch -d <branch>` and remote `git push origin --delete <branch>`.
-5. Push `develop`.
+4. Push `develop`.
+5. Delete the branch, **remote first** (`git push origin --delete <branch>`), then local (`git branch -d <branch>`): removing the remote first drops the upstream tracking ref, so `-d` does not refuse the local branch as "not merged to its upstream".
 
 ### Release start `<version>` / Hotfix start `<version>`
 1. Validate SemVer.
-2. Release: `git checkout -b release/<version> develop`. Hotfix: `git checkout -b hotfix/<version> main`.
-3. **Bump the package/project version(s) on this branch** and commit.
-4. `git push -u origin <branch>`.
+2. Working tree clean. Release: `git checkout develop && git pull && git checkout -b release/<version>`. Hotfix: the same from `main`.
+3. `git push -u origin <branch>`.
+4. **Bump the package/project version(s) on this branch** and commit. The extension does not bump — this step is yours.
 
 ### Release / Hotfix finish (transactional — develop first)
-1. Working tree clean. Capture the current commits of `main` and `develop` first (for rollback).
+1. Working tree clean. `git pull` on `main` and on `develop`, then capture their commits (for rollback).
 2. `git checkout develop && git merge --no-ff --no-edit <branch>`
 3. `git checkout main && git merge --no-ff --no-edit <branch>`
-4. `git tag -a v<version> main -m "<notes>"` (add `--cleanup=verbatim` if notes have `#` headings).
+4. `git tag -a v<version> main -m "Release v<version>"` (`Hotfix v<version>` for a hotfix; richer notes are fine — add `--cleanup=verbatim` if they have `#` headings).
 5. **Atomic push** so the remote updates all refs or none: `git push --atomic origin main develop --tags` (keep the tag on the remote).
-6. Delete the branch local + remote.
-7. **On merge conflict**: abort and **revert** main/develop to the commits captured in step 1. Never leave a half-merged main.
+6. Delete the branch, remote first, then local (as in the feature finish).
+7. Leave the repository on `develop`.
+8. **On any failure** (a conflict, a rejected push): abort the merge, delete the tag if it was created, and **revert** main/develop to the commits captured in step 1. Never leave a half-merged main.
 
 ## Pushing
 
