@@ -34,14 +34,14 @@ The .NET *how* of `testing` (load it for the *why*). xUnit v3 is the framework; 
 
 ## Layout
 
-- `test/<Project>.Tests/` — one test project per production project, its folders mirroring the production tree (`Domain/`, `Application/`…). **One file per unit**: `<Unit>Tests.cs`, a `public sealed class <Unit>Tests`.
+- `test/<Project>.Tests/` — one test project per production project, its folders mirroring the production tree (`Domain/`, `Application/`…). An API whose modules are endpoints only has instead one suite for the host, with a file per endpoint (`Endpoints/<Module>EndpointTests.cs`). **One file per unit**: `<Unit>Tests.cs`, a `public sealed class <Unit>Tests`.
 - `test/<Project>.Tests/Support/` — fixtures, test-data helpers and fakes, next to the tests that use them.
 - `test/Directory.Build.props` — the configuration every test project shares: it imports the root props, sets `IsPackable`/`IsPublishable` false and `OutputType` `Exe`, references `xunit.v3` and the runner, adds `<Using Include="Xunit" />`, and copies whatever the suites run against (the schema scripts) to the output. A helper every suite needs is compiled in with `<Compile Include="…\Shared\X.cs" Link="Shared\X.cs" />` rather than copied into each project.
 - The production project exposes its internals to its own suite only: `<InternalsVisibleTo Include="<Project>.Tests" />`. The domain stays `internal`; nothing is made public for a test's sake.
 
 ## Names
 
-`Method_StateUnderTest_ExpectedBehavior`, the method being the unit's public entry point: `Extract_WithoutADate_ReturnsTheCountOfTheTable`, `Create_OnAnEmptyCorrelationId_ThrowsValidationException`. A test whose name needs "And" is two tests.
+`Method_StateUnderTest_ExpectedBehavior`, the method being the unit's public entry point: `Extract_WithoutADate_ReturnsTheCountOfTheTable`, `Create_OnAnEmptyCorrelationId_ThrowsValidationException`. One act per test: an "And" joining two acts is two tests; one joining facets of a single outcome (`Load_WithNoIds_ReturnsEmptyAndDeactivatesNothing`) is one.
 
 ## Cancellation
 
@@ -97,7 +97,7 @@ public sealed class PostgreSqlCollection : ICollectionFixture<PostgreSqlFixture>
 A static `<Unit>TestDatabase` (or mother) in `Support/` gives the Arrange its vocabulary:
 
 - the **canonical values** every seeded row carries (an instant, a seeded and a changed value of the field under test), so a test can place its input before or after them;
-- **`Entity(id, …)`** — one valid row, with optional parameters only for the axes tests vary — and **`Rows(count)`** for slices asserted by id;
+- **`Entity(id, …)`** — one valid row, with optional parameters only for the axes tests vary (those parameters are the builder `testing` describes, without a fluent type) — and **`Rows(count)`** for slices asserted by id;
 - built through **`From`**, not `Create`, so seeding never trips a field rule unrelated to the test;
 - a helper that holds a **long argument list once** (a load with fifty fields), so tests pass only what they vary.
 
