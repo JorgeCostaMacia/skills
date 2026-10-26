@@ -1,0 +1,10 @@
+{
+  "name": "code-style-net",
+  "description": "How C# is written, enforced as build errors: explicit types (no var, no target-typed new(), no collection expressions), braces always, one parameter or argument per line from two up, naming and modifier conventions, is null outside expression trees, comments only where the code cannot speak, CRLF, dotnet format before committing, and no NoWarn or pragma.",
+  "version": "1.4.0",
+  "author": {
+    "name": "Jorge Costa Maciá",
+    "email": "costamaciajorge@gmail.com"
+  },
+  "license": "MIT"
+}
