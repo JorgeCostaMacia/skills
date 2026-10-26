@@ -42,7 +42,7 @@ Microsoft's own C# conventions recommend `var` where the type is evident, the co
 
 ## Enforced by the analyzers
 
-The `.editorconfig` turns these into build errors, so they are stated here only so a generator writes them right the first time: **file-scoped namespaces**, and the namespace **matches the folder**; `using`s **outside** the namespace, `System` first; **no primary constructors**; an **explicit accessibility** on every member; a field that is never reassigned is **`readonly`**.
+The `.editorconfig` turns these into build errors, so they are stated here only so a generator writes them right the first time: **file-scoped namespaces**, and the namespace **matches the folder**; `using`s **outside** the namespace, `System` first; an **explicit accessibility** on every member; a field that is never reassigned is **`readonly`**. **No primary constructors** is a rule too, but one nothing enforces: `csharp_style_prefer_primary_constructors = false` only stops the IDE from suggesting them — a reviewer catches them, until the grep learns to.
 
 ## Names
 

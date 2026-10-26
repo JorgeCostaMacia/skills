@@ -21,7 +21,7 @@ How the model meets the store, for any provider. The per-aggregate `DbContext` a
 ## Mapping
 
 - **One `DbContext` per aggregate**, configured in `OnModelCreating` with one `Entity<X>(entity => …)` block: the table (`ToTable("x", "<schema>")`), the key with a named constraint (`HasKey(e => e.Id).HasName("pk_x")`), then every property — **every column named explicitly** (`HasColumnName("snake_case")`), so a renamed property never renames a column.
-- **Value objects map as `ComplexProperty` over their `.Value`**, `IsRequired(false)` on the optional ones:
+- **Value objects map as `ComplexProperty` over their `.Value`**, `IsRequired(false)` on the optional ones (an optional complex type needs EF Core 10 or later):
 
   ```csharp
   entity

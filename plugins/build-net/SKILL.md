@@ -55,7 +55,7 @@ Every restore audits direct **and** transitive packages (`all` is already the de
 
 ## global.json
 
-At the root, selecting the test runner — `{ "test": { "runner": "Microsoft.Testing.Platform" } }` — which xUnit v3 on the current SDK needs for `dotnet test` to run at all (see `testing-net`). Pin an SDK there only with a reason.
+At the root, selecting the test runner — `{ "test": { "runner": "Microsoft.Testing.Platform" } }`. xUnit v3 defaults to VSTest under `dotnet test`, which would need `Microsoft.NET.Test.Sdk`; the test projects carry the MTP runner instead, so without this file `dotnet test` finds nothing (see `testing-net`). Pin an SDK there only with a reason.
 
 ## Feeds
 

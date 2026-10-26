@@ -46,9 +46,9 @@ The one exception: a **thin driving adapter** — one that only unpacks its inpu
 
 The shape follows **cost**: the higher you go, the slower the feedback and the vaguer the diagnosis — so most checks live at the bottom and only critical paths at the top. It's a **guide, not a mandate**: not every project needs all three levels, and the right proportion is each stack/project's call. What the pyramid actually forbids is **inverting it** — thousands of e2e tests over a handful of unit tests, where every change costs a full slow run to validate.
 
-## One test file per unit under test — [canon, via SRP]
+## One test file per unit under test — [our convention: Meszaros' Testcase Class per Class]
 
-Each test file exercises exactly **one** unit. With single-responsibility units (see `solid`), per-unit equals per-behavior — the form every school converges on. What's forbidden is the lumped file testing many units at once: it hides which units are covered, and it's the test-side mirror of the god-class. File *placement* (mirrored tree, colocated specs…) → the stack skill.
+Meszaros documents three ways to organize tests: a class per production class, a class per feature of it, a class per fixture. **We take the first**: each test file exercises exactly **one** unit, so a reader sees at a glance what is covered and the test tree mirrors production. Per feature only when a class has grown several independent behaviours — and then ask whether the class should split; per fixture never: it groups by setup and hides which unit is tested, and shared infrastructure is the stack's fixture mechanism's job, not the file's. What's forbidden either way is the lumped file testing many units at once: the test-side mirror of the god-class. File *placement* (mirrored tree, colocated specs…) → the stack skill.
 
 ## Test names are specification — [canon]
 
@@ -63,7 +63,7 @@ The *format* is per school and per stack tooling — all equivalent realizations
 - Shared builders/fixtures stay close to the tests that use them — a test file reads top-to-bottom without hunting elsewhere.
 - No timing-based tests: inject the clock / control the scheduler — or, where the code reads the clock itself, assert the instant against a window captured just before and just after the call. A sleep in a test is a flake with a countdown.
 
-## Test data: Object Mother + Builder — [canon: Meszaros; our default]
+## Test data: Object Mother + Builder — [canon: Schuh & Punke's Object Mother, Pryce's Test Data Builder; our default]
 
 Two complementary patterns build the Arrange, with a clear division of labour — reach for them instead of hand-constructing objects inline in every test:
 

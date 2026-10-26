@@ -25,7 +25,7 @@ _logger.LogInformation(GetType().Name);
 
 The class's own name is the grouping key: fixed, unique, and never typed by hand. Use a literal (`"UserLoad"`) only where one class logs more than one event.
 
-- No interpolation (`$"…"`), no `{Placeholder}` templates — Serilog renders those into the message.
+- No interpolation (`$"…"`), no `{Placeholder}` templates: Serilog keeps the template and its properties apart, but what the store groups on is the rendered line, and that is where a placeholder's value lands (see `logging`).
 - Failure: `_logger.LogError(exception, GetType().Name)` — **the exception is the first argument**, so Serilog captures it structured; the message is the same as the success path's, the level tells them apart.
 - Levels keep `logging`'s names through `ILogger` (`Information`, `Warning`, `Error`, `Critical`); Serilog writes `Critical` as `Fatal` — the same level, so a `MinimumLevel` of `Fatal` in configuration is `Critical` in code.
 

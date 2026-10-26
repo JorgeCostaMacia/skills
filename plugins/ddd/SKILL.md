@@ -37,9 +37,9 @@ Canon-anchored (Evans' *Domain-Driven Design*, Vernon's *Implementing DDD*): sec
 
 ## Creation & hydration — [canon: the Factory pattern]
 
-- **Creation always goes through a factory** (`Create`…) that converts the input and **validates before returning** — an object cannot be *created* invalid. Factories are DDD's answer to guarded construction.
+- **Creation goes through a factory** (`Create`…) that converts the input and **validates before returning** — an object cannot be *created* invalid. Factories are DDD's answer to guarded construction; Evans keeps a plain constructor for the simple cases. **[our convention]** Here it is *always* the factory, so every type has the same surface.
 - **Converting is not normalizing** — [our convention]: a factory converts the input to **the type's own representation** (a trimmed text, an instant in UTC, a date at the store's precision) — that is what the type *is*, not a rule of the domain — and **never coerces** an invalid value into a valid one. A layer whose types represent the source's values as they came keeps every value as it came: there the conversion is a pass-through.
-- **Hydration is a separate path**: a plain constructor reserved for **reconstitution** — infrastructure (ORM, deserializer) restoring already-validated state. Hydration is *recovery*, not *entry*; it doesn't re-validate. (Evans distinguishes creation from reconstitution explicitly.)
+- **Hydration is a separate path**: a plain constructor reserved for **reconstitution** — infrastructure (ORM, deserializer) restoring already-validated state. Evans distinguishes creation from reconstitution explicitly, and only says a violated invariant is handled *differently* there; **[our convention]** hydration is *recovery*, not *entry*, and doesn't re-validate at all.
 
 ## Value objects — [canon]
 
@@ -62,10 +62,10 @@ Canon-anchored (Evans' *Domain-Driven Design*, Vernon's *Implementing DDD*): sec
 - Enforced by the **factory**: it runs the type's validator before returning — **nothing invalid escapes a factory**. (Instance-based validators may build-then-validate internally; the guarantee is at the factory boundary, not the micro-order inside it.) Being pure, the validator needs no injection.
 - Structural, so it holds on **every** path — HTTP, bus, backfill — nobody has to remember it.
 
-**Level 2 — use-case validity (preconditions): the use case owns it — [canon]**
+**Level 2 — use-case validity (preconditions) — [canon-adjacent]**
 
 - *"Is this correct object admissible **here, now**?"* Rules that need services or state: uniqueness against a store, referenced things existing, business-state conflicts. Not properties of the object — properties of the **system state at a moment** (the same email is valid today and a duplicate tomorrow).
-- They live in **Application**, with injected dependencies, and reject with **domain errors** ("already exists"…). Where a data constraint backs the rule (a unique index), the application check gives the friendly error and the constraint gives the concurrency-proof guarantee.
+- **[our convention]** They live in **Application**, with injected dependencies, and reject with **domain errors** ("already exists"…). The canon puts them in a domain service (Vernon) or a Specification (Evans); we keep them in the use case, next to the load or insert they guard, and extract a domain service only when the same check repeats. Where a data constraint backs the rule (a unique index), the application check gives the friendly error and the constraint gives the concurrency-proof guarantee.
 - The litmus test: **if the rule needs a service, it's level 2** — a type's validator must stay pure.
 
 **How the rules are held — [our convention]**
@@ -81,7 +81,7 @@ Canon-anchored (Evans' *Domain-Driven Design*, Vernon's *Implementing DDD*): sec
 ## Domain events — [canon]
 
 - Named **past tense**, after the business fact: `<X>Created`, `<X>Loaded`, `<X>Deleted`. An event states something that **already happened** — subscribers react, they can't veto.
-- The canon separates **domain events** (inside the model) from **integration events** (the contract that crosses contexts), with an explicit mapping between the two. **[our convention]** The context's published events *are* its domain events: the root raises the event declared in its contract, so what the model announces is exactly what the outside sees — no second type, no mapping, no in-process dispatcher whose only job would be to copy fields. A separate internal event earns its place only when the model needs to raise something it does not publish, or the two shapes diverge.
+- Microsoft's microservices guidance separates **domain events** (inside the model) from **integration events** (the contract that crosses contexts), with an explicit mapping between the two; Vernon instead publishes the domain event itself through messaging, as part of the context's published language, and lets each consumer translate on its own side. **[our convention, with Vernon]** The context's published events *are* its domain events: the root raises the event declared in its contract, so what the model announces is exactly what the outside sees — no second type, no mapping, no in-process dispatcher whose only job would be to copy fields. A separate internal event earns its place only when the model needs to raise something it does not publish, or the two shapes diverge.
 - Collection/dispatch mechanics (how aggregates accumulate events, when they're published) → the stack skill.
 
 ## Domain errors — [canon-adjacent]
@@ -90,7 +90,7 @@ Canon-anchored (Evans' *Domain-Driven Design*, Vernon's *Implementing DDD*): sec
 - Infrastructure failures (timeouts, connectivity) are **not** domain errors — they surface separately, and resilience policy (retries, redelivery) handles them; retrying a business error is pointless.
 - *How* errors travel — an exception family per concept, a Result/Either type, error returns — is the **stack skill's decision**.
 
-## Modules / bounded contexts — [canon]
+## Bounded contexts — [canon]
 
-- A module owns its model: its aggregates, its language, its rules. Other modules integrate through its **published contracts** (events, commands), never by reaching into its internals.
+- A bounded context owns its model: its aggregates, its language, its rules. Other contexts integrate through its **published contracts** (events, commands), never by reaching into its internals. (Evans' MODULE is a smaller thing — a package inside one model; here "module" is the runtime's name for a bounded context.)
 - The same business word may mean different things in different contexts — that's two concepts; don't force one shared model.

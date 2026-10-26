@@ -22,7 +22,7 @@ Logs are consumed as **structured data** — queried, grouped, counted and alert
 The message is a **fixed, low-cardinality constant** — the name of the event or of the unit that logs it:
 
 - **Never interpolate.** `"User 42 loaded in 13ms"` makes every occurrence a distinct message; counts, dashboards and alerts on it die.
-- **No templates rendered into the message either.** A placeholder the library substitutes into the text reintroduces the cardinality; the message groups, the data travels beside it.
+- **No templates rendered into the message either** — [our convention]. A structured library may keep the template and the values apart, but the log store groups on the **rendered line**, and a placeholder rendered into it reintroduces the cardinality; the message groups, the data travels beside it as properties.
 - **The message never carries the failure** — no exception text, no offending value. Those go in the error and the properties; the message stays stable.
 - **[our convention] Name it after the unit that logs it** — the handler's or the job's own name — so the key is unique, stable and written by no one: renaming the unit renames its series.
 

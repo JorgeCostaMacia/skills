@@ -33,11 +33,11 @@ No single book describes this architecture — three do, each answering one ques
 | Layer | Owns | Never contains |
 | --- | --- | --- |
 | **Domain** | entities, aggregates, value objects, domain events, domain errors, validation rules | ORM/serializer/transport types, IO. A stack skill MAY declare specific libraries as **accepted core couplings** — deliberate and named, never accidental. |
-| **Application** | the use cases — orchestration: build/validate domain objects, execute the change, raise events. Use-case services are **concrete — no interface per use case**: a use case has exactly one implementation by definition, and an interface with a single implementer and no seam requirement is speculative (see `solid`). | presentation or transport concerns; business rules (they belong in Domain) |
+| **Application** | the use cases — orchestration: build/validate domain objects, execute the change, raise events. **[our convention]** Use-case services are **concrete — no interface per use case** (Martin draws an input-port interface in front of the interactor): a use case has exactly one implementation by definition, and an interface with a single implementer and no seam requirement is speculative (see `solid`). | presentation or transport concerns; business rules (they belong in Domain) |
 | **Infrastructure** | adapters that touch the outside: persistence, external clients, IO. Mapping between persistence shape and domain lives here (the boundary owns its contract). | business logic, use-case orchestration |
 | **Presentation** | the delivery mechanisms — HTTP endpoints, bus consumers, CLI, jobs — **thin**: validate/convert input → call an Application service → return/publish. Mapping between transport contracts and domain lives here. | business logic of any kind |
 
-Layer names are the de-facto standard (and nearly Evans' own — see the name mapping below). Evans defines the Presentation layer as interpreting commands from the outside, **"the external actor might be another computer system rather than a human user"** — a bus consumer is this layer as literally as a controller.
+Layer names are the de-facto standard (and nearly Evans' own — see the name mapping below). Evans defines the Presentation layer as interpreting commands from the outside, **"the external actor might sometimes be another computer system rather than a human user"** — a bus consumer is this layer as literally as a controller.
 
 ## The dependency rule — [canon]
 
@@ -65,10 +65,10 @@ The four layers live **inside** each bounded context — self-contained, includi
 Contexts never reach into each other; how they do relate is chosen per pair, from Evans' strategic patterns. Two carry this architecture:
 
 - **Published Language** — the default between contexts: each context publishes its messages (commands, events, their routes) as a **contract** of its own, versioned on its own, and the others integrate only through it. Consumers depend on the contract, never on the context's runtime.
-- **Shared Kernel** — the exception, inside **one system**: the small part of the model several of its contexts agree to share — a common rule, conversion or value — because a copy per context would drift.
+- **Shared Kernel** — the exception: the small part of the model two contexts agree to share and change together. Evans has two teams in mind; **[our convention]** here it is inside **one system** — a common rule, conversion or value — because a copy per context would drift.
   - **Small and explicit**: only what more than one context genuinely needs; what belongs to one stays in it. Not a dumping ground for "utilities".
   - **Changed with every user in mind**: a change to the kernel is a change to every context that uses it.
-  - **Internal**: never published to outside consumers — they integrate through the Published Language.
+  - **Internal** — [our convention]: never published to outside consumers — they integrate through the Published Language.
   - [our convention] Layered like any context (its rules in Domain, a shared adapter in Infrastructure) and split **one shared module per concern**, never one bag for everything.
 
 ## The hexagonal lens — [canon: Cockburn]
