@@ -1,8 +1,8 @@
 ---
 name: gitflow
 description: >-
-  Jorge's GitFlow workflow for branches and releases. Use this whenever the work
-  touches branching or releasing in any of Jorge's repos — starting or finishing a
+  A GitFlow workflow for branches and releases. Use this whenever the work
+  touches branching or releasing in a repo that follows it — starting or finishing a
   feature, bugfix, release, or hotfix; creating a release/hotfix branch; bumping a
   version; tagging (`vX.Y.Z`); merging into develop or main; or publishing a new
   version — even when the user doesn't say "gitflow" explicitly (e.g. "cut a release",
@@ -13,9 +13,9 @@ description: >-
   never improvised.
 ---
 
-# GitFlow (Jorge's flow)
+# GitFlow
 
-This mirrors Jorge's `gitflow-vscode` extension. Follow it **from the start** of any branching/release work. Never improvise direct `develop→main` merges or bolt a tag on at the end.
+This mirrors the `gitflow-vscode` extension. Follow it **from the start** of any branching/release work. Never improvise direct `develop→main` merges or bolt a tag on at the end.
 
 ## Branch model
 
@@ -67,7 +67,7 @@ Use `git merge --no-ff --no-edit` so the **default** merge message is kept (`Mer
 
 ## Pushing
 
-Jorge's `gitflow-vscode` tool does the pushes itself (start: `push -u`; finish: atomic). When **you (the agent) cannot push** (push is blocked in some of his repos — e.g. shared-net), do every **local** step, then **stop before the push** and give Jorge the exact command(s) to run (`git push -u origin <branch>`, or `git push --atomic origin main develop --tags`). Do the local work; he pushes.
+The `gitflow-vscode` extension does the pushes itself (start: `push -u`; finish: atomic). When **you (the agent) cannot push** (push is blocked in some repos), do every **local** step, then **stop before the push** and give the user the exact command(s) to run (`git push -u origin <branch>`, or `git push --atomic origin main develop --tags`). Do the local work; the user pushes.
 
 ## Commit identity
 
@@ -77,4 +77,4 @@ Commit with **the identity git already has** — don't set one in the command. I
 
 A release sometimes **cannot** fit a single `release/X` branch: when packages reference each other via `PackageReference` (NuGet), a dependent can only build against an **already-published** version. So a tiered library (e.g. tier0 → tier1 → top) must publish in **separate pushes**, waiting for each tier to index on the registry before the next references it — which one release branch can't span in time.
 
-If you hit this, **raise it with Jorge BEFORE proceeding** and agree the plan. Do **not** silently switch to ad-hoc per-tier `develop→main` merges (that exact deviation, in a real NuGet rollout, is what this skill exists to prevent). When phased, the milestone tag still lands on `main` at the end via a normal annotated tag + atomic push.
+If you hit this, **raise it with the user BEFORE proceeding** and agree the plan. Do **not** silently switch to ad-hoc per-tier `develop→main` merges (that exact deviation, in a real NuGet rollout, is what this skill exists to prevent). When phased, the milestone tag still lands on `main` at the end via a normal annotated tag + atomic push.

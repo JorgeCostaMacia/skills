@@ -1,7 +1,7 @@
 ---
 name: logging-net
 description: >-
-  Application logging style for Jorge's .NET code — Serilog is the accepted
+  Application logging style for .NET code — Serilog is the accepted
   coupling. Use when writing or reviewing ANY log statement (ILogger calls,
   LogInformation/Warning/Error), choosing a log message or level, adding
   logging to handlers, services, consumers, jobs or listeners, pushing

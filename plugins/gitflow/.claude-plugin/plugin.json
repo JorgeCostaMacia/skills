@@ -1,6 +1,6 @@
 {
   "name": "gitflow",
-  "description": "Jorge's GitFlow workflow for branches and releases.",
+  "description": "A GitFlow workflow for branches and releases.",
   "version": "1.4.0",
   "author": {
     "name": "Jorge Costa Maciá",

@@ -2,7 +2,7 @@
 name: validation-net
 description: >-
   The .NET realization of the two-level validation model (see the `ddd` skill
-  for the principles). Use when working with validation in Jorge's .NET code:
+  for the principles). Use when working with validation in .NET code:
   writing or reviewing FluentValidation validators, value objects and their
   From/Create factories, aggregate factories, request validators, deciding
   where a rule lives (type invariant vs use-case precondition), wiring
