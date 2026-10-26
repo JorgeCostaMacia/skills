@@ -108,11 +108,11 @@ app.UseEnrichAuthenticationMiddleware();                        // pushes the au
 app.UseAuthorization();
 ```
 
-**The request log wraps the exception handler and authorization**: a failed request is then logged with the status it really got (400, 500), and a refused one (401, 403) is logged too. Put the request log inside the exception handler and every failure is logged as a 500.
+**The request log wraps the exception handler and authorization**: a failed request is then logged with the status it really got (400, 500), and a refused one (401, 403) is logged too. Put the request log inside the exception handler and every failure is logged as a 500. An endpoint handler logs nothing of its own: the request log is its line, with the status it answered and the properties the enrichers pushed.
 
 ### Bus hosts
 
-The bus pipeline logs a failed message and its retry or parking. A handler logs only its own success line and lets the exception propagate — logging it there too would log one failure twice.
+The bus pipeline logs a failed message and its retry or parking, and its own lines already carry the message `Body` (the bus's logger pushes it into the context). A handler therefore logs only its own success line — pushing its parameters and counts, never the payload again — and lets an exception propagate: logging it there too would log one failure twice.
 
 ## Configuration
 
