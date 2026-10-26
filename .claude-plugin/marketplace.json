@@ -78,6 +78,16 @@
       "name": "bus-kafka-net",
       "source": "./plugins/bus-kafka-net",
       "description": "How the services use the Kafka transport of the JorgeCostaMacia.Bus family: the topic as the route with the contracts major, partitions declared per service in the admin map, no message key on purpose, the consumer group as a stable contract named after the handler, parked messages in .error, and one broker user per service."
+    },
+    {
+      "name": "efcore-net",
+      "source": "./plugins/efcore-net",
+      "description": "EF Core conventions for any provider: value objects as ComplexProperty over .Value, keys, explicit column names, a column date kind stated in the mapping, != null in expression trees, sargable half-open date ranges, the token on every call and the FindAsync trap, scoped contexts, and the schema built from the real scripts."
+    },
+    {
+      "name": "efcore-postgres-net",
+      "source": "./plugins/efcore-postgres-net",
+      "description": "EF Core on PostgreSQL with Npgsql: xmin as a shadow row version for optimistic concurrency, the legacy timestamp switch with timestamp without time zone kept on purpose, microsecond precision, the database collation, one schema per layer, and indexes only on foreign keys."
     }
   ]
 }
