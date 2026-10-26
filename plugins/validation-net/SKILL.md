@@ -16,7 +16,7 @@ description: >-
 
 # Validation in .NET (FluentValidation)
 
-The .NET *how* of the two-level model defined in `ddd` (load it for the *why*). **FluentValidation is the accepted core coupling** for validation — deliberate, evaluated, not to be wrapped or replaced. This skill covers validators for anything — a request, a query criterion, a domain type; how a domain model applies it (which validator each type builds, and when) is the domain skill's.
+The .NET *how* of the two-level model defined in `ddd` (load it for the *why*). **FluentValidation is the accepted core coupling** for validation — deliberate, evaluated, not to be wrapped or replaced. This skill covers validators for anything — a request, a query criterion, a domain type; how a domain model applies it (which validator each type builds, and when) is `ddd-net`'s.
 
 ## The two levels, realized
 
@@ -84,7 +84,7 @@ internal sealed class FacturaValidator : AbstractValidator<Factura>
 
 ## The ValidationException
 
-`<X>ValidationException` derives the shared base — `JorgeCostaMacia.Exception`'s `ValidationException`, or the one its base type already extends (`DateTimeValueObjectValidationException`…) — and carries a **fixed GUID code** and the failure list (`ImmutableList<ValidationFailure>`). At an HTTP boundary that list becomes per-field ProblemDetails errors (`JorgeCostaMacia.Http.ProblemDetails` renders it). The rest of a domain's exceptions (`NotFound`, `Exist`) belong to the domain skill.
+`<X>ValidationException` derives the shared base — `JorgeCostaMacia.Exception`'s `ValidationException`, or the one its base type already extends (`DateTimeValueObjectValidationException`…) — and carries a **fixed GUID code** and the failure list (`ImmutableList<ValidationFailure>`). At an HTTP boundary that list becomes per-field ProblemDetails errors (`JorgeCostaMacia.Http.ProblemDetails` renders it). The rest of a domain's exceptions (`NotFound`, `Exist`) belong to `ddd-net`.
 
 ## Boundary — standard FluentValidation, when there is one
 
@@ -104,7 +104,7 @@ if (existing is not null)
 ```
 
 - Level-2 checks stay **in the use case** — usually glued to the load or insert they guard (a "validator with a repository inside" doubles the query and blurs the vocabulary: a validator constructor asking for a repository is the red flag). If the same check repeats across use cases, extract a helper or domain service — not a FluentValidation validator.
-- Uniqueness gets the **double defense**: the application check gives the friendly domain error; the **unique index** gives the concurrency-proof guarantee (translate its violation to the same family exception).
+- Uniqueness gets the **double defense**: the application check gives the friendly domain error; the **unique index** gives the concurrency-proof guarantee. What its violation becomes depends on the write. Where the write is **idempotent** — a version travels with the data and a guard turns a second attempt into an update or a no-op — a duplicate key is a race between two writers: let it propagate, the retry resolves it (see `messaging`). Where it is not, the duplicate is a business fact: translate it to the family's `<X>ExistException` — a 409 at an HTTP boundary, and in a consumer an exception its retry policy excludes, since repeating the write cannot change the answer.
 
 ## Testing this model
 
