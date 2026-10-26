@@ -10,7 +10,7 @@ description: >-
   keys as primitives or value-converted VOs, explicit column names, what a
   column's DateTimeKind means stated in the mapping, `!= null` inside
   expression trees, sargable half-open date ranges, the token on every call
-  (and the FindAsync trap), a fresh context per step, and the schema built
+  (and the FindAsync trap), writes through the tracked entity, a fresh context per step, and the schema built
   from the real scripts. Provider specifics live in the provider's skill.
 ---
 
@@ -52,7 +52,7 @@ How the model meets the store, for any provider. The per-aggregate `DbContext` a
 
   A function on the column is computed per row and can't use an index; the range can.
 - **Paging** skips with the page size's own arithmetic (`size.Offset(page)`), over a stable order.
-- Bulk deletes go through `ExecuteDeleteAsync` — no raw SQL for what LINQ can say.
+- **Writes go through the tracked entity** — load, change or `Remove`, `SaveChangesAsync`. `ExecuteUpdateAsync` / `ExecuteDeleteAsync` bypass the change tracker, the concurrency check and the aggregate's events, so production code doesn't use them; test fixtures do, to empty a table between tests (see `testing-net`). No raw SQL for what LINQ can say.
 
 ## Cancellation
 
