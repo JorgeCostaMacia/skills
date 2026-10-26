@@ -6,7 +6,7 @@
 
 Curated agent skills and workflows for AI coding agents — installable as a Claude Code plugin marketplace ([agentskills.io](https://agentskills.io) standard).
 
-Each skill lives as its own plugin under `plugins/`, so you can install only what you need. The stack-agnostic skills (`ddd`, `testing`, `logging`, `messaging`…) hold the principles; each `-net` skill is their .NET realization and declares a `dependencies` entry on them, so installing a `-net` skill enables the principles it builds on. The stack-agnostic skills (`ddd`, `testing`, `logging`, `messaging`…) hold the principles; each `-net` skill is their .NET realization and declares a `dependencies` entry on them, so installing a `-net` skill enables the principles it builds on.
+Each skill lives as its own plugin under `plugins/`, so you can install only what you need. The stack-agnostic skills (`ddd`, `testing`, `logging`, `messaging`…) hold the principles; each `-net` skill is their .NET realization and declares a `dependencies` entry on them, so installing a `-net` skill enables the principles it builds on.
 
 ## Available plugins
 

@@ -12,7 +12,7 @@ This repo is a Claude Code **plugin marketplace** that hosts agent skills. Each 
      SKILL.md                       # the skill (frontmatter + instructions)
    ```
 
-   A `-net` skill declares `"dependencies": ["<generic skill>"]` so installing it enables the principles it builds on; a generic skill declares none and never names a `-net` one.
+   A `-net` skill declares `"dependencies": ["<generic skill>"]` so installing it enables the principles it builds on; a generic skill declares none and never names a `-net` one. A `-net` skill with no generic counterpart (`efcore-net`, `code-style-net`, `build-net`) declares none and may name other `-net` skills.
 
 2. `SKILL.md` frontmatter — at minimum a `description` (and `name` for a plugin-root skill). The `description` is what tells the agent *when* to use the skill, so make it specific. Keep it under ~1,500 chars.
 

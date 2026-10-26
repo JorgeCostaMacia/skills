@@ -27,6 +27,7 @@ The class's own name is the grouping key: fixed, unique, and never typed by hand
 
 - No interpolation (`$"…"`), no `{Placeholder}` templates — Serilog renders those into the message.
 - Failure: `_logger.LogError(exception, GetType().Name)` — **the exception is the first argument**, so Serilog captures it structured; the message is the same as the success path's, the level tells them apart.
+- Levels keep `logging`'s names through `ILogger` (`Information`, `Warning`, `Error`, `Critical`); Serilog writes `Critical` as `Fatal` — the same level, so a `MinimumLevel` of `Fatal` in configuration is `Critical` in code.
 
 ## Properties — through the log context
 
@@ -46,7 +47,7 @@ using (LogContext.PushProperty("CorrelationId", context.Message.AggregateCorrela
 
 It reads at a glance, and a generated handler stays uniform with every other.
 
-**The same set in several statements — one `PushProperties` helper per class**, so the list lives once and the statements cannot drift apart:
+**The same set in several statements — one `PushProperties` helper per class**, so the list lives once and the statements cannot drift apart (today only the libraries' own loggers log several lines with one set — the bus's does it this way; an application class logs one):
 
 ```csharp
 private static IDisposable PushProperties(

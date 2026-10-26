@@ -61,6 +61,7 @@ public sealed record PedidosExtractCommand : Command
 - **Keep both constructors** and keep them in step; the contracts suite (`MessageContract`) proves every message survives the wire and both constructors agree.
 - Payload is primitives and other records — no value objects, no domain types: a contract is a published language, not the model.
 - Names: commands `<Module><Action>Command` (imperative), events `<Module><Fact>Event` (past tense: `Extracted`, `Loaded`).
+- A `<Module>LoadedEvent` carries the row's previous state as `AggregateLoadedEvent` — the same event type, `null` when the row was created — built before the aggregate is mutated (see `messaging`).
 
 ## Handlers and subscribers
 
@@ -96,8 +97,12 @@ Every handler and subscriber is registered with the **same ladder and the same e
 
 ```csharp
 ImmutableList<TimeSpan> retry = ImmutableList.Create(
-    TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(15), TimeSpan.FromMinutes(30),
-    TimeSpan.FromHours(1), TimeSpan.FromHours(12), TimeSpan.FromDays(1));
+    TimeSpan.FromMinutes(5),
+    TimeSpan.FromMinutes(15),
+    TimeSpan.FromMinutes(30),
+    TimeSpan.FromHours(1),
+    TimeSpan.FromHours(12),
+    TimeSpan.FromDays(1));
 ImmutableList<Type> exclude = ImmutableList.Create(typeof(ValidationException));
 ```
 

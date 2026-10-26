@@ -38,10 +38,11 @@ The .NET *how* of `testing` (load it for the *why*). xUnit v3 is the framework; 
 - `test/<Project>.Tests/Support/` — fixtures, test-data helpers and fakes, next to the tests that use them.
 - `test/Directory.Build.props` — the configuration every test project shares: it imports the root props, sets `IsPackable`/`IsPublishable` false and `OutputType` `Exe`, references `xunit.v3` and the runner, adds `<Using Include="Xunit" />`, and copies whatever the suites run against (the schema scripts) to the output. A helper every suite needs is compiled in with `<Compile Include="…\Shared\X.cs" Link="Shared\X.cs" />` rather than copied into each project.
 - The production project exposes its internals to its own suite only: `<InternalsVisibleTo Include="<Project>.Tests" />`. The domain stays `internal`; nothing is made public for a test's sake.
+- The test namespace shadows the aggregate the way the module's does (`Pasarela.Raw.Pedidos.Tests` against the type `Pedidos`), so a test file that needs the type aliases it once: `using PedidosAggregate = Pasarela.Raw.Pedidos.Domain.Pedidos;`.
 
 ## Names
 
-`Method_StateUnderTest_ExpectedBehavior`, the method being the unit's public entry point: `Extract_WithoutADate_ReturnsTheCountOfTheTable`, `Create_OnAnEmptyCorrelationId_ThrowsValidationException`. One act per test: an "And" joining two acts is two tests; one joining facets of a single outcome (`Load_WithNoIds_ReturnsEmptyAndDeactivatesNothing`) is one.
+`Method_StateUnderTest_ExpectedBehavior`, the method being the unit's public entry point: `Extract_WithoutADate_ReturnsTheCountOfTheTable`, `Load_WithAnEmptyCorrelationId_ThrowsValidationExceptionAndDeactivatesNothing`. One act per test: an "And" joining two acts is two tests; one joining facets of a single outcome (`Load_WithNoIds_ReturnsEmptyAndDeactivatesNothing`) is one.
 
 ## Cancellation
 
@@ -63,16 +64,19 @@ public sealed class PostgreSqlFixture : IAsyncLifetime
         await using XContext context = NewContext();
         foreach (string script in new string[] { "schema.sql", "tables.sql", "indexes.sql" })
         {
-            await context.Database.ExecuteSqlRawAsync(
-                await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "database", script), TestContext.Current.CancellationToken),
+            string sql = await File.ReadAllTextAsync(
+                Path.Combine(AppContext.BaseDirectory, "database", script),
                 TestContext.Current.CancellationToken);
+            await context.Database.ExecuteSqlRawAsync(sql, TestContext.Current.CancellationToken);
         }
     }
 
     public async ValueTask DisposeAsync() => await _container.DisposeAsync();
 
     internal XContext NewContext()
-        => new XContext(new DbContextOptionsBuilder<XContext>().UseNpgsql(_container.GetConnectionString()).Options);
+        => new XContext(new DbContextOptionsBuilder<XContext>()
+            .UseNpgsql(_container.GetConnectionString())
+            .Options);
 
     internal async Task ResetAsync()
     {

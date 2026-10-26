@@ -37,7 +37,7 @@ Every consumer is written as if each message could arrive **twice, late, or befo
 - **The version travels with the data.** Each message carries the instant (or sequence) of the state it describes, and the consumer stores it with what it writes.
 - **Apply only what is strictly newer** (`stored < incoming`). An equal version is a redelivery — a no-op. An older one is stale — dropped.
 - **A newer message always moves the stored version**, even when it changes nothing else; otherwise the row looks older than it is, and a stale message handled later wins.
-- **Publish only on a real change**, so identical messages don't ripple downstream.
+- **Publish only on a real change**, so identical messages don't ripple downstream — and let the event carry the **previous state** next to the new one (`null` when the row is new), so a consumer can tell what changed without a second read.
 - **One instant per operation**: the version stamped on what an operation writes and publishes is taken once, at its start.
 
 ## Concurrent writes
