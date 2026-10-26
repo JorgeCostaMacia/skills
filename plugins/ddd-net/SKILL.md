@@ -69,7 +69,7 @@ internal sealed record PedidosReferencia : LongValueObject
 
 ### Convert — the one place a value is altered
 
-The base's `protected static Convert` is the only place a value changes on its way in (`StringValueObject` trims). A derived VO that needs another rule **hides it** — `private static new` — and every factory picks it up:
+The base's `protected static Convert` is the only place a value changes on its way in, and what it does is convert the input to **the base's representation**: `StringValueObject` trims, `DateTimeUtcValueObject` yields an instant in UTC. A derived VO whose type represents something else **hides it** — `private static new` — and every factory picks it up:
 
 ```csharp
 // fidelity: a landing layer keeps the source's text as it came
@@ -165,7 +165,7 @@ Each concept ships its typed exceptions, one file each, deriving the `JorgeCosta
 
 ## Events
 
-The root collects what happened as `IDomainEvent`s through `AddEvent(...)`, and whoever persists it takes them with `PullEvents()` **after** a successful save — so no event escapes a failed operation. How they are dispatched or published belongs to the messaging side, not to this skill.
+The root collects what happened as `IDomainEvent`s through `AddEvent(...)` — in this family the contract's own event, since the bus's `Event` is an `IDomainEvent` (see `ddd`: the published events *are* the domain events) — and whoever persists it takes them with `PullEvents()` **after** a successful save, so no event escapes a failed operation. How they reach the bus is `bus-net`'s.
 
 ## The aggregate's accessor
 
