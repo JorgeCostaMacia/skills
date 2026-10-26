@@ -3,6 +3,7 @@
   "owner": {
     "name": "Jorge Costa Maciá"
   },
+  "description": "Agent skills for software engineering: stack-agnostic principles (SOLID, clean architecture, DDD, testing, logging, messaging, GitFlow, pnpm) and their .NET realizations.",
   "plugins": [
     {
       "name": "gitflow",
