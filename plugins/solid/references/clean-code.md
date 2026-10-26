@@ -31,7 +31,7 @@ Priority order when they conflict: **consistency > understandability > specifici
 
 - A comment is a **last resort after renaming and extracting failed**. Comments that restate the code rot into lies.
 - Good comments say what the code *cannot*: a non-obvious constraint, a link to the spec/issue, why the obvious approach was rejected.
-- Delete commented-out code — version control remembers it.
+- Delete commented-out code — version control remembers it. The one exception is a switch meant to be flipped by hand (a registration an operator uncomments for a one-off run), kept with a comment saying when and why.
 
 ## Errors
 
