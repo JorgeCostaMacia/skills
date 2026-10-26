@@ -4,13 +4,12 @@ description: >-
   The .NET realization of tactical DDD (see the `ddd` skill for the
   principles). Use when writing or reviewing C# domain code: value objects
   and their factories, aggregates and their From/Create, the domain exception
-  family, collecting events on the root, or mapping the domain to EF Core
-  (DbContext per aggregate, ComplexProperty, keys, value converters). It
+  family, collecting events on the root, or giving an aggregate its DbContext. It
   encodes the JorgeCostaMacia.* base types, the four-factory surface
   (From, FromOrNull, Create, CreateOrNull) and why every one is declared,
   Convert as the one place a value is altered, no coercion and no defaults on
-  a value object, the aggregate rule (From cascades, Create seals), and the
-  EF Core mapping of value objects.
+  a value object, the aggregate rule (From cascades, Create seals), and one
+  DbContext per aggregate as its accessor.
 ---
 
 # DDD in .NET
@@ -24,7 +23,6 @@ The building blocks come from the `JorgeCostaMacia.*` packages; derive from them
 | Package | Gives |
 | --- | --- |
 | `JorgeCostaMacia.ValueObject` | `StringValueObject`, `IntValueObject`, `LongValueObject`, `DecimalValueObject`, `DateTimeValueObject`, `DateTimeUtcValueObject`, `BoolValueObject`, `UuidValueObject`… — each with its validator and validation exception |
-| `JorgeCostaMacia.ValueObject.EfConverter` | One EF Core `ValueConverter` per base, built on the hydration constructor |
 | `JorgeCostaMacia.Aggregate` | `Aggregate`: the root's base, with `AddEvent` / `PullEvents` |
 | `JorgeCostaMacia.Entity` / `.DomainEvent` | `IEntity`, `IDomainEvent` |
 | `JorgeCostaMacia.Exception` | `NotFoundException`, `ExistException`, `ValidationException`, `ErrorException` — the bases of every family exception, each with a fixed code |
@@ -102,11 +100,11 @@ A VO made of other VOs (a page range of two page numbers) is a plain `IValueObje
 ```csharp
 internal sealed class Pedidos : Aggregate
 {
-    public long Id { get; init; }                          // the identity: see "Keys" below
+    public long Id { get; init; }                          // the identity (see ddd: it may stay a primitive)
     public PedidosReferencia? Referencia { get; set; }     // optional field, nullable VO
     public PedidosMetaActive MetaActive { get; set; } = null!;
 
-    private Pedidos() { }                                   // EF Core materialization
+    private Pedidos() { }                                   // ORM materialization
 
     public Pedidos(long id, PedidosReferencia? referencia, PedidosMetaActive metaActive)   // hydration
     {
@@ -148,24 +146,9 @@ Each concept ships its typed exceptions, one file each, deriving the `JorgeCosta
 
 The root collects what happened as `IDomainEvent`s through `AddEvent(...)`, and whoever persists it takes them with `PullEvents()` **after** a successful save — so no event escapes a failed operation. How they are dispatched or published belongs to the messaging side, not to this skill.
 
-## Persistence — EF Core
+## The aggregate's accessor
 
-- **One `DbContext` per aggregate**, internal to its module, its `DbSet` named `<X>Repository`. Application uses it as the aggregate's accessor (an accepted core coupling, no repository port around it).
-- **Each VO maps as a `ComplexProperty` over its `.Value`**, with `IsRequired(false)` on the optional ones and an explicit `HasColumnName`:
-
-  ```csharp
-  entity
-      .ComplexProperty(e => e.Referencia, c => c
-          .IsRequired(false)
-          .Property(v => v.Value)
-          .HasColumnName("referencia"));
-  ```
-
-  Value semantics: the instance is never tracked, so one VO can be assigned to many aggregates. That breaks if the mapping ever becomes an owned type, which has identity.
-- **Queries filter on `.Value`** (`e => e.MetaActive.Value`). Inside an expression tree a null check is `!= null`, not `is not null` (`CS8122`).
-- **Keys.** A complex property cannot be a key. Either the identity stays a primitive (the named exception in `ddd`), or it is a VO mapped through a value converter — `HasConversion` with the `EfConverter` package — in which case queries compare the whole VO (`e.Id == id`), not `.Value`, and `FindAsync` takes the VO.
-- **What a column means is the mapping's to state**, not the VO's: a converter such as `HasConversion(v => v, v => DateTime.SpecifyKind(v, DateTimeKind.Utc))` tags dates the store holds in UTC because this layer wrote them — and must not be put on columns whose zone this layer does not know.
-- Map from the real tables, not `EnsureCreated`: integration tests build the database from the same scripts production runs, so a mapping that drifts from a column fails there.
+**One `DbContext` per aggregate**, internal to its module, its `DbSet` named `<X>Repository`: the per-aggregate accessor `ddd` asks for. Application uses it as-is — an accepted core coupling, with no repository port around it. How the model maps to the tables (value objects, keys, converters) is persistence, not this skill's.
 
 ## Testing this model
 
