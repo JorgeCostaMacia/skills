@@ -6,13 +6,13 @@
 
 Curated agent skills and workflows for AI coding agents — installable as a Claude Code plugin marketplace ([agentskills.io](https://agentskills.io) standard).
 
-Each skill lives as its own plugin under `plugins/`, so you can install only what you need. The stack-agnostic skills (`ddd`, `testing`, `logging`, `messaging`…) hold the principles; each `-net` skill is their .NET realization and declares a `dependencies` entry on them, so installing a `-net` skill enables the principles it builds on.
+Each skill lives as its own plugin under `plugins/`, so you can install only what you need. The stack-agnostic skills (`ddd`, `testing`, `logging`, `messaging`…) hold the principles; each `-net` skill is their .NET realization and declares a `dependencies` entry on them, so installing a `-net` skill enables the principles it builds on. The stack-agnostic skills (`ddd`, `testing`, `logging`, `messaging`…) hold the principles; each `-net` skill is their .NET realization and declares a `dependencies` entry on them, so installing a `-net` skill enables the principles it builds on.
 
 ## Available plugins
 
 | Plugin | Description |
 | --- | --- |
-| [gitflow](plugins/gitflow) | A GitFlow workflow for branches and releases. |
+| [gitflow](plugins/gitflow) | A GitFlow workflow for branches and releases: feature/bugfix/release/hotfix start and finish, SemVer tags, default merge messages, commit identity, and the phased-publish caveat. |
 | [solid](plugins/solid) | Transversal software-engineering principles: SOLID, simple design, clean code, code smells and complexity management — applied with judgment, not dogma. |
 | [pnpm](plugins/pnpm) | Package-management baseline for any Node.js work: pnpm 12 with dependency build scripts denied unless reviewed (allowBuilds), a strict 3-day minimum release age, no exotic transitive sources, pinned package manager and Node 26, and frozen lockfile in CI. |
 | [clean-architecture](plugins/clean-architecture) | Clean architecture layering with hexagonal (ports & adapters) boundaries, stack-agnostic and canon-anchored: the four layers inside each bounded context, the inward dependency rule, ports for external capabilities, and the name mapping to Evans, Uncle Bob, Microsoft and Jason Taylor. |
