@@ -7,17 +7,17 @@
     {
       "name": "gitflow",
       "source": "./plugins/gitflow",
-      "description": "A GitFlow workflow: feature/bugfix/release/hotfix start & finish, SemVer tags, default merge messages, commit identity, and the phased-publish caveat."
+      "description": "A GitFlow workflow for branches and releases: feature/bugfix/release/hotfix start and finish, SemVer tags, default merge messages, commit identity, and the phased-publish caveat."
     },
     {
       "name": "solid",
       "source": "./plugins/solid",
-      "description": "Transversal engineering principles for any code, front or back: SOLID, simple design, clean code, code smells and complexity management — applied with judgment, not dogma."
+      "description": "Transversal software-engineering principles: SOLID, simple design, clean code, code smells and complexity management — applied with judgment, not dogma."
     },
     {
       "name": "pnpm",
       "source": "./plugins/pnpm",
-      "description": "Package-management baseline for any Node.js work: pnpm 12 with dependency build scripts denied unless reviewed (allowBuilds), a strict 3-day minimum release age, pinned package manager and frozen lockfile in CI."
+      "description": "Package-management baseline for any Node.js work: pnpm 12 with dependency build scripts denied unless reviewed (allowBuilds), a strict 3-day minimum release age, no exotic transitive sources, pinned package manager and Node 26, and frozen lockfile in CI."
     },
     {
       "name": "clean-architecture",
@@ -40,6 +40,11 @@
       "description": "The .NET realization of tactical DDD: the JorgeCostaMacia.* base types, value objects with their four factories and Convert, no coercion or defaults, aggregates (From cascades, Create seals), the exception family with fixed codes, events collected on the root, and one DbContext per aggregate as its accessor."
     },
     {
+      "name": "validation-net",
+      "source": "./plugins/validation-net",
+      "description": "The .NET realization of validation with FluentValidation, for anything that gets validated: one validator and one exception per validated thing, per-call validators from DI or static Create() chains, composition with Include/SetValidator, every rule evaluated (no Cascade), rule and message conventions, optional boundary validators, and use-case preconditions in Application."
+    },
+    {
       "name": "testing",
       "source": "./plugins/testing",
       "description": "Testing principles and the pragmatic TDD loop, stack-agnostic and canon-anchored: done means tested, the test pyramid, one test file per unit, names as specification, AAA and independence, classicist test doubles, behavior over implementation, and rule coverage over line coverage."
@@ -50,11 +55,6 @@
       "description": "The .NET realization of the testing principles: xUnit v3 on Microsoft.Testing.Platform, test project layout and shared props, InternalsVisibleTo, naming, TestContext cancellation (xUnit1051), Testcontainers fixtures built from the repo's own scripts, test-data helpers, the clock, the host composition test, WebApplicationFactory host tests with hand-written fakes, and running the suites."
     },
     {
-      "name": "validation-net",
-      "source": "./plugins/validation-net",
-      "description": "The .NET realization of validation with FluentValidation, for anything that gets validated: one validator and one exception per validated thing, per-call validators from DI or static Create() chains, composition with Include/SetValidator, every rule evaluated (no Cascade), rule and message conventions, optional boundary validators, and use-case preconditions in Application."
-    },
-    {
       "name": "logging",
       "source": "./plugins/logging",
       "description": "Application logging principles for any stack: the message as a fixed grouping key, all variable data as structured properties, the level as the outcome, correlation in every scope, a failure logged once where it is handled, and observability over log volume."
@@ -63,6 +63,21 @@
       "name": "logging-net",
       "source": "./plugins/logging-net",
       "description": "The .NET realization of the logging principles with Serilog: GetType().Name as the message, LogContext properties (a using per property for one statement, a PushProperties helper per class for a reused set), destructured payloads, the exception first in LogError, correlation properties in every scope, the pipeline packages, and minimum levels in configuration."
+    },
+    {
+      "name": "messaging",
+      "source": "./plugins/messaging",
+      "description": "Asynchronous messaging principles for any stack and broker: commands vs events, contracts with the major in the topic, every message assumed duplicated and out of order, the version in the data with a strict newer-wins guard, optimistic concurrency on the write, retries owned by the broker, and malformed messages parked, not retried."
+    },
+    {
+      "name": "bus-net",
+      "source": "./plugins/bus-net",
+      "description": "The .NET realization of the messaging principles with the JorgeCostaMacia.Bus family, for every transport: Command/Event records with their two constructors, thin CommandHandler/EventSubscriber adapters, Send/Publish with the incoming transport, the standard retry ladder with ValidationException excluded, retries parked in Quartz and run by bus-jobs, routes and the producer/admin/consumer maps."
+    },
+    {
+      "name": "bus-kafka-net",
+      "source": "./plugins/bus-kafka-net",
+      "description": "How the services use the Kafka transport of the JorgeCostaMacia.Bus family: the topic as the route with the contracts major, partitions declared per service in the admin map, no message key on purpose, the consumer group as a stable contract named after the handler, parked messages in .error, and one broker user per service."
     }
   ]
 }
