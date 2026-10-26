@@ -52,7 +52,7 @@ Each test file exercises exactly **one** unit. With single-responsibility units 
 
 ## Test names are specification — [canon]
 
-A test name states the behavior it verifies: a reader learns the rule without opening the body, and the suite reads as the unit's specification. If the name needs "and", it's two tests.
+A test name states the behavior it verifies: a reader learns the rule without opening the body, and the suite reads as the unit's specification. **One act per test**: a name whose "and" joins two acts is two tests; an "and" joining facets of one act's outcome (returned nothing *and* changed nothing) is one test with several asserts.
 
 The *format* is per school and per stack tooling — all equivalent realizations of the same canon: `MethodName_StateUnderTest_ExpectedBehavior` (Osherove), `Should_X_When_Y`, Given-When-Then (BDD), `describe/it` sentences (JS). Each stack skill fixes its idiomatic one.
 
@@ -73,7 +73,7 @@ Two complementary patterns build the Arrange, with a clear division of labour �
 
 The guardrail: **a mother names a STATE, not a field tweak.** `Invoices.Overdue()` — yes; `Customers.PremiumButNoEmail()` — no, that's the builder's job. Once mother names start carrying `WithX`, the variation belongs in the builder. Well-segregated units (see `solid`) have few meaningful states, so the mother set stays small on its own.
 
-Concrete form and placement — static classes, naming, where the mothers/builders live — are the stack skill's call.
+Concrete form and placement — static classes, naming, where the mothers/builders live — are the stack skill's call, and so is the builder's shape: a fluent type, or optional parameters on the mother's method, realize the same pattern.
 
 ## Behavior over implementation — [canon: classicist school]
 
