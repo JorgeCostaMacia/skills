@@ -71,9 +71,48 @@ using (PushProperties(request, correlationId))
 - **`AggregateId` and `CorrelationId` in every scope**, under those names, so every service's lines join on them.
 - If another library in the project ships its own `LogContext`, alias Serilog's: `using LogContext = Serilog.Context.LogContext;`.
 
-## The pipeline
+## Wiring — the host
 
-Request logging, exception logging and the environment/version enrichers come from the `JorgeCostaMacia.Serilog`, `JorgeCostaMacia.Http.Serilog` and `JorgeCostaMacia.Http.Exception.Serilog` packages, wired once in the host. The bus pipeline logs a failed message and its retry or parking; a handler logs only its own success line and lets the exception propagate.
+Every host registers Serilog the same way, in its `ProgramBuilder`:
+
+```csharp
+if (builder.Environment.IsDevelopment())
+{
+    Serilog.Debugging.SelfLog.Enable(Console.Error);   // Serilog's own errors (a broken sink, a bad config) to the console
+}
+
+builder.Services.AddSerilog((services, config) => config
+    .ReadFrom.Configuration(builder.Configuration)      // levels, overrides and sinks from appsettings
+    .WithDefaults());                                   // JorgeCostaMacia.Serilog
+```
+
+`WithDefaults()` (`JorgeCostaMacia.Serilog.Infrastructure`) adds what every line needs: `FromLogContext` — without it no pushed property reaches the line —, the thread and process ids, structured exception details, and the entry assembly's `Version` and `Application`. Don't re-add those enrichers by hand; anything a service needs on top is configuration.
+
+### HTTP hosts
+
+The request and exception logging come from `JorgeCostaMacia.Http.Serilog` and `JorgeCostaMacia.Http.Exception.Serilog`:
+
+```csharp
+// ProgramBuilder
+builder.Services.AddExceptionHandler<ExceptionHandler>();      // logs the exception once, maps it to ProblemDetails
+
+// ProgramApplication — order matters
+app.UseBodyBufferMiddleware();                                  // lets the request body be read for the log
+app.UseEnrichRequestMiddleware();                               // pushes the request's properties around the rest
+app.UseSerilogRequestLogging(options => options.WithDefaults());
+app.UseExceptionHandler(new ExceptionHandlerOptions().WithDefaultStatusCodes());
+app.UseStatusCodePages();
+app.UseRouting();
+app.UseAuthentication();
+app.UseEnrichAuthenticationMiddleware();                        // pushes the authenticated user
+app.UseAuthorization();
+```
+
+**The request log wraps the exception handler and authorization**: a failed request is then logged with the status it really got (400, 500), and a refused one (401, 403) is logged too. Put the request log inside the exception handler and every failure is logged as a 500.
+
+### Bus hosts
+
+The bus pipeline logs a failed message and its retry or parking. A handler logs only its own success line and lets the exception propagate — logging it there too would log one failure twice.
 
 ## Configuration
 
