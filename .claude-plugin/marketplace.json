@@ -57,7 +57,7 @@
     {
       "name": "bus-kafka-net",
       "source": "./plugins/bus-kafka-net",
-      "description": "The Kafka transport of the JorgeCostaMacia.Bus family: topics as routes with the contracts major, partitions in the admin map, no message key, consumer groups named after the handler, the .error and .fault topics, the Bus configuration sections with per-service credentials, startup throttling, and health checks."
+      "description": "How the services use the Kafka transport of the JorgeCostaMacia.Bus family: the topic as the route with the contracts major, partitions declared per service in the admin map, no message key on purpose, the consumer group as a stable contract named after the handler, parked messages in .error, and one broker user per service."
     }
   ]
 }
