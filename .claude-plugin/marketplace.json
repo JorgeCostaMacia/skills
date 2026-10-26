@@ -88,6 +88,16 @@
       "name": "efcore-postgres-net",
       "source": "./plugins/efcore-postgres-net",
       "description": "EF Core on PostgreSQL with Npgsql: xmin as a shadow row version for optimistic concurrency, the legacy timestamp switch with timestamp without time zone kept on purpose, microsecond precision, the database collation, one schema per layer, and indexes only on foreign keys."
+    },
+    {
+      "name": "code-style-net",
+      "source": "./plugins/code-style-net",
+      "description": "How C# is written, enforced as build errors: explicit types (no var, no target-typed new(), no collection expressions) as a stated departure from Microsoft's defaults, braces always, a 120-column width with all-or-nothing wrapping and growing lists kept vertical, naming and modifier conventions, is null outside expression trees, comments only where the code cannot speak, CRLF, dotnet format before committing, and no NoWarn or pragma."
+    },
+    {
+      "name": "build-net",
+      "source": "./plugins/build-net",
+      "description": "How a .NET repository is built, versioned and restored: the three-tier Directory.Build.props, one VersionPrefix per repo and the separately released piece that keeps its own, Central Package Management, the NuGet vulnerability audit as a build gate, global.json, packing metadata for libraries, and a NuGet configuration without credentials."
     }
   ]
 }
