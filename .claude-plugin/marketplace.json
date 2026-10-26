@@ -50,9 +50,14 @@
       "description": "The .NET realization of validation with FluentValidation, for anything that gets validated: one validator and one exception per validated thing, per-call validators from DI or static Create() chains, composition with Include/SetValidator, every rule evaluated (no Cascade), rule and message conventions, optional boundary validators, and use-case preconditions in Application."
     },
     {
+      "name": "logging",
+      "source": "./plugins/logging",
+      "description": "Application logging principles for any stack: the message as a fixed grouping key, all variable data as structured properties, the level as the outcome, correlation in every scope, a failure logged once where it is handled, and observability over log volume."
+    },
+    {
       "name": "logging-net",
       "source": "./plugins/logging-net",
-      "description": "Application logging style for .NET with Serilog: fixed low-cardinality messages as grouping keys (never interpolation or placeholders, never failure details in the message), all data via LogContext.PushProperty, same message across levels for outcome pairs, and correlation ids in every scope."
+      "description": "The .NET realization of the logging principles with Serilog: GetType().Name as the message, LogContext properties (a using per property for one statement, a PushProperties helper per class for a reused set), destructured payloads, the exception first in LogError, correlation properties in every scope, the pipeline packages, and minimum levels in configuration."
     }
   ]
 }
