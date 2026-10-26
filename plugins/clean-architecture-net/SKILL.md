@@ -32,12 +32,12 @@ src/
 ├─ <Service>.Shared.<X>/          a shared kernel, one per concern — internal, never packed
 └─ <Service>.Query/               the read model, packed with its own version (when the service has one)
 test/
-└─ <Service>.<Module>.Tests/      one suite per project
+└─ <Service>.<Module>.Tests/      one suite per project (an API with endpoint-only modules: one suite for the host)
 ```
 
-- **The layers are folders inside the module's project**, not projects of their own: the dependency rule is held by review and by the namespaces, and a module stays one unit to add, move or delete. A module's `.csproj` references contracts packages — its own and those it consumes —, never another module's project.
+- **The layers are folders inside the module's project**, not projects of their own: the dependency rule is held by review and by the namespaces, and a module stays one unit to add, move or delete. A module holds **the layers it needs**: a worker's module has the four; a webhook module that only turns a request into an event has `Presentation/` alone. A module's `.csproj` references contracts packages — its own and those it consumes — and the service's shared kernels it uses, never another module's project.
 - **The host references every module project** and nothing else of theirs but their `<Module>Context`.
-- The module is named in the ubiquitous language (`Pedidos`, `Expedientes`). `Contracts`, `Query` and `Shared` are **reserved segments**: no module may take one as its name.
+- The module is named in the ubiquitous language (`Pedidos`, `Expedientes`), and so is its aggregate — which makes `Pedidos` both the namespace segment and the type. Inside the module the type is reached as `Domain.Pedidos` where the namespace would shadow it, and the module's contracts context as `Contracts.Pedidos.PedidosContext`, since the runtime's own `PedidosContext` hides it. Both forms are the convention, not a smell. `Contracts`, `Query` and `Shared` are **reserved segments**: no module may take one as its name.
 
 ## Internal by default
 
@@ -68,8 +68,8 @@ public static class PedidosContext
 }
 ```
 
-- **`Add<Module>Context(services, configuration)`** registers the module's services by calling its layers' own `internal static` contexts — `<Module>InfrastructureContext` registers the DbContext, the clients and the Application services (`AddScoped<XService>()`, concrete, no interface).
-- **`Map<Module>…Context(...)`** maps the module's driving adapters: `Map<Module>BusContext(consumer)` for its bus handlers, `Map<Module>HttpContext(endpoints)` for its endpoints (a `MapGroup` per module). A module with nothing to register returns its argument unchanged — the method still exists, so the host composes every module the same way.
+- **`Add<Module>Context(services, configuration)`** registers the module's services by calling its layers' own `internal static` contexts — `<Module>InfrastructureContext` registers the DbContext, the clients and the Application services (`AddScoped<XService>()`, concrete, no interface). A module that reads no configuration takes only `services`; one that registers nothing returns them unchanged — the method still exists, so the host composes every module the same way.
+- **`Map<Module>…Context(...)`** maps the module's driving adapters: `Map<Module>BusContext(consumer)` for its bus handlers, `Map<Module>HttpContext(endpoints)` for its endpoints (a `MapGroup` per module).
 - **Configuration is read where it is used**, and a missing required value fails at startup with a clear message (`GetConnectionString("X") ?? throw new InvalidOperationException("Connection string 'X' is null.")`).
 - Each method returns what it received, so the host chains them.
 
