@@ -1,51 +1,58 @@
 ---
 name: logging-net
 description: >-
-  Application logging style for Jorge's .NET code — Serilog is the accepted
-  coupling. Use when writing or reviewing ANY log statement (ILogger calls,
-  LogInformation/Warning/Error), choosing a log message or level, adding
-  logging to handlers, services, consumers, jobs or listeners, pushing
-  context/correlation into logs, or configuring structured logging. It
-  encodes: fixed low-cardinality messages that act as grouping keys (never
-  interpolation, never placeholders, never failure details in the message),
-  all variable data via LogContext.PushProperty, same message across levels
-  for outcome pairs, and correlation ids in every scope.
+  The .NET realization of the logging principles (see the `logging` skill for
+  the why) — Serilog is the accepted coupling. Use when writing or reviewing
+  ANY log statement in .NET (ILogger calls, LogInformation/Warning/Error),
+  pushing properties into the log context, adding logging to handlers,
+  services, consumers or jobs, or configuring Serilog. It encodes: the
+  message as GetType().Name, LogContext.PushProperty for single statements
+  and one PushProperties helper per class when the same set serves several,
+  destructureObjects for payloads, the exception as LogError's first
+  argument, correlation properties in every scope, the JorgeCostaMacia.Serilog
+  pipeline packages, and minimum levels set in configuration.
 ---
 
 # Logging in .NET (Serilog)
 
-**Serilog is the accepted core coupling** for logging — not wrapped, not replaced. Logs are consumed as **structured data** (Loki/Grafana): the design goal is *grouping and querying*, not prose.
+The .NET *how* of `logging` (load it for the *why*). **Serilog is the accepted core coupling** — not wrapped, not replaced. Code logs through an injected `ILogger<T>`; Serilog is the provider behind it.
 
-## The rule: the message is a grouping key
-
-The message is a **fixed, low-cardinality constant** — an event name or a semi-generic outcome:
+## The message
 
 ```csharp
-Logger.LogInformation("UserLoad");
-Logger.LogError(exception, "UserLoad fail");
-Logger.LogError(exception, "Handler failed.");
+_logger.LogInformation(GetType().Name);
 ```
 
-- **Never interpolate**: `$"User {id} loaded in {ms}ms"` destroys grouping — every occurrence becomes a distinct message; dashboards and alerts on counts die.
-- **No `{Placeholder}` templates in the message either** — stricter than default Serilog guidance: placeholders render the values into the message string, reintroducing cardinality. The message groups; the data travels separately.
-- **The message never exposes the failure itself** — no exception text, no offending value. The detail lives in the exception argument and the context properties; the message stays opaque and stable.
+The class's own name is the grouping key: fixed, unique, and never typed by hand. Use a literal (`"UserLoad"`) only where one class logs more than one event.
 
-## All variable data via context
+- No interpolation (`$"…"`), no `{Placeholder}` templates — Serilog renders those into the message.
+- Failure: `_logger.LogError(exception, GetType().Name)` — **the exception is the first argument**, so Serilog captures it structured; the message is the same as the success path's, the level tells them apart.
 
-Every property becomes queryable/filterable structured data. A one-off property is a simple scope:
+## Properties — through the log context
+
+Every property is pushed into `Serilog.Context.LogContext` around the statement; the line carries whatever is pushed when it is written.
+
+**One log statement — push each property in its own `using`:**
 
 ```csharp
-using (LogContext.PushProperty("UserId", request.UserId))
+using (LogContext.PushProperty("PageSize", context.Message.PageSize))
+using (LogContext.PushProperty("Commands", commands.Count))
+using (LogContext.PushProperty("AggregateId", context.Message.AggregateId))
+using (LogContext.PushProperty("CorrelationId", context.Message.AggregateCorrelationId))
 {
-    Logger.LogInformation("UserLoad");
+    _logger.LogInformation(GetType().Name);
 }
 ```
 
-**Repeated or multi-property context → one `PushProperties` helper per class** — native `LogContext.Push` with `PropertyEnricher`s; no stacked `using` towers, no custom aggregators:
+It reads at a glance, and a generated handler stays uniform with every other.
+
+**The same set in several statements — one `PushProperties` helper per class**, so the list lives once and the statements cannot drift apart:
 
 ```csharp
-private static IDisposable PushProperties(UserLoadRequest request, Guid correlationId) =>
-    LogContext.Push(
+private static IDisposable PushProperties(
+    UserLoadRequest request,
+    Guid correlationId)
+    => LogContext.Push(
         new PropertyEnricher("AggregateId", request.AggregateId),
         new PropertyEnricher("CorrelationId", correlationId),
         new PropertyEnricher("UserId", request.UserId),
@@ -55,41 +62,19 @@ private static IDisposable PushProperties(UserLoadRequest request, Guid correlat
 ```csharp
 using (PushProperties(request, correlationId))
 {
-    Logger.LogInformation("UserLoad");
+    _logger.LogInformation(GetType().Name);
 }
 ```
 
-- `destructureObjects: true` for complex payloads — structured, not `ToString()`.
-- Query by property (`UserId="42"` in Loki/Grafana), never by message text.
-- `PropertyEnricher` lives in `Serilog.Core.Enrichers`. Gotcha: alongside MassTransit, alias the import — `using LogContext = Serilog.Context.LogContext;` (MassTransit ships its own `LogContext`).
+- `PropertyEnricher` lives in `Serilog.Core.Enrichers`; `LogContext.Push` takes them all and returns one disposable.
+- **`destructureObjects: true`** for a complex payload — logged as a structured object, not its `ToString()`.
+- **`AggregateId` and `CorrelationId` in every scope**, under those names, so every service's lines join on them.
+- If another library in the project ships its own `LogContext`, alias Serilog's: `using LogContext = Serilog.Context.LogContext;`.
 
-## Levels split the series; the message stays
+## The pipeline
 
-Outcome pairs share the SAME message and differ by **level** — in Grafana the series splits by level while keeping the grouping key:
+Request logging, exception logging and the environment/version enrichers come from the `JorgeCostaMacia.Serilog`, `JorgeCostaMacia.Http.Serilog` and `JorgeCostaMacia.Http.Exception.Serilog` packages, wired once in the host. The bus pipeline logs a failed message and its retry or parking; a handler logs only its own success line and lets the exception propagate.
 
-- `LogInformation("UserLoad")` — success path.
-- `LogError(exception, "UserLoad")` — failure path, **exception as the first argument** (Serilog captures it structured; it never goes into the message).
-- `LogWarning(...)` — anomalies that aren't failures (skipped, retried, ignored).
-- `LogCritical(...)` — **the APPLICATION dies**: startup failure (invalid config, can't reach broker/DB during bootstrap), unrecoverable state, the host going down. A failed handler or use case is `Error`, NOT Critical — the app keeps serving. Mental test: *if the process is still handling requests after the log line, it wasn't Critical.*
+## Configuration
 
-The severity ladder encodes **outcome scope**: Information = normal · Warning = anomaly without failure · Error = the *operation* failed · Critical = the *application* is dying.
-
-Alert recipe for free: rate of `message="UserLoad" AND level=Error` over total.
-
-## Correlation in every scope
-
-`AggregateId` and `CorrelationId` are pushed in **every** logging scope — they tie the log line to the end-to-end trace (the same correlation that flows bus → services → persistence in the Meta* model). A log line you can't correlate is a log line you can't debug.
-
-## Pipeline vs application logs
-
-Cross-cutting enrichment (request logging, exception logging, environment/version enrichers) comes from the packages (`JorgeCostaMacia.Serilog`, `Http.Serilog`, `Http.Exception.Serilog`) wired in the host — don't hand-roll it per service. This style governs the **application-level** log statements you write in handlers, services, consumers, jobs.
-
-## Anti-patterns
-
-- ✘ `LogInformation($"User {id} loaded")` — interpolation; cardinality bomb.
-- ✘ `LogInformation("Loaded user {UserId}", id)` — placeholder renders into the message; use a fixed message + `PushProperty`.
-- ✘ `LogError($"Failed: {ex.Message}")` — failure detail in the message AND the exception lost as structured data.
-- ✘ Serializing objects into the message — that's what `destructureObjects` is for.
-- ✘ One-off phrase messages per call site ("about to start processing the thing…") — unqueryable noise; if it deserves a log, it deserves a stable event name.
-- ✘ Levels as decoration — level encodes outcome severity (Information/Warning/Error/Critical), not emphasis.
-- ✘ `LogCritical` for a failed operation — Critical is reserved for the application dying; an operation failure is `Error`.
+Serilog is configured from `appsettings` (`Serilog:MinimumLevel`), and a source is turned up or down with **`MinimumLevel:Override`** — never by deleting statements. When the default is stricter than a package's own logs (a `Default` of `Error` hiding a library's expected-failure `Warning`s), override that package's namespace instead of lowering the default.
