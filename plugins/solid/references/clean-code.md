@@ -22,9 +22,9 @@ Priority order when they conflict: **consistency > understandability > specifici
 ## Structure
 
 - **Tell, don't ask**: move behavior to where the data lives instead of pulling data out to decide elsewhere. Chains like `a.getB().getC().doThing()` couple the caller to the whole path (Law of Demeter — talk to friends, not strangers).
-- **Wrap primitives that carry rules.** An email, a money amount, a page size — if it has validation or invariants, it deserves a type (value object) so invalid values become unrepresentable. Plain primitives are fine for values with no rules.
+- **Wrap primitives that carry rules.** An email, a money amount, a page size — if it has validation or invariants, it deserves a type (value object) so invalid values become unrepresentable.
 - **First-class collections** when a collection has behavior of its own (invariants, filtering rules, aggregation); if it's just a list, keep it a list.
-- **Fail fast**: validate at the boundary/construction and throw with a message that says *what* and *which value*; don't limp along with bad state.
+- **Fail fast**: validate at the boundary/construction and throw with a message that says *what* and *which value*; don't limp along with bad state. Never correct a bad value silently — no clamping into range, no default filled in: reject it. A default is policy, and policy belongs to the caller.
 - **Immutability by default** where the language makes it cheap; mutation is an optimization that needs a reason.
 
 ## Comments
