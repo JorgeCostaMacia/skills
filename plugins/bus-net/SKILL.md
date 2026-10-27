@@ -11,7 +11,7 @@ description: >-
   encodes: Command/Event sealed records with their two constructors,
   CommandHandler<T>/EventSubscriber<T> as thin adapters, IBus Send/Publish
   with the incoming transport, the standard backoff with ValidationException
-  excluded, retries parked in Quartz and run by bus-jobs, route and handler
+  excluded, retries parked in Quartz and run by a separate jobs worker, route and handler
   naming, and the producer/admin/consumer maps.
 ---
 
@@ -109,7 +109,7 @@ ImmutableList<Type> exclude = ImmutableList.Create(typeof(ValidationException));
 
 - **`ValidationException` (the shared base, `JorgeCostaMacia.Exception.Domain`) is always excluded**: a malformed message is parked at once, never retried. FluentValidation's own `ValidationException` is not that base: a validator that doesn't override `RaiseValidationException` throws the wrong one, and its message climbs the ladder. A concurrency failure is *not* excluded — the retry re-decides against the current state. A consumer whose write is not idempotent also excludes the `ExistException` a retry cannot change (see `messaging`).
 - A step of `TimeSpan.Zero` requeues at once; a positive one is **scheduled** through the retry store.
-- **The retry store is Quartz**: `AddQuartz(q => q.WithPostgresDefaults("retry", "JobsBus", "bus"))` (`WithPostgresDefaults` is `JorgeCostaMacia.Quartz`'s) plus `AddRetryContext()` from `JorgeCostaMacia.Bus.<Transport>.Retry.Quartz` — the `retry` scheduler, the `JobsBus` connection, tables prefixed `bus.`. The worker **only parks** retries: it never adds `AddQuartzHostedService`. **bus-jobs** is the worker that starts that scheduler and fires them. Without a retry store a delayed retry cannot be scheduled and the message is parked as terminal.
+- **The retry store is Quartz**: `AddQuartz(q => q.WithPostgresDefaults(<scheduler>, <connection name>, <table prefix>))` (`WithPostgresDefaults` is `JorgeCostaMacia.Quartz`'s) plus `AddRetryContext()` from `JorgeCostaMacia.Bus.<Transport>.Retry.Quartz` — one scheduler name and one store shared by every service that parks retries. A service **only parks** retries: it never adds `AddQuartzHostedService`. A **separate jobs worker**, on the same scheduler and store, starts it and fires them — so a deploy of a service never changes who runs the retries. Without a retry store a delayed retry cannot be scheduled and the message is parked as terminal.
 
 ## Routes and the maps
 

@@ -38,7 +38,7 @@ The .NET *how* of `testing` (load it for the *why*). xUnit v3 is the framework; 
 - `test/<Project>.Tests/Support/` — fixtures, test-data helpers and fakes, next to the tests that use them.
 - `test/Directory.Build.props` — the configuration every test project shares: it imports the root props, sets `IsPackable`/`IsPublishable` false and `OutputType` `Exe`, references `xunit.v3` and the runner, adds `<Using Include="Xunit" />`, and copies whatever the suites run against (the schema scripts) to the output. A helper every suite needs is compiled in with `<Compile Include="…\Shared\X.cs" Link="Shared\X.cs" />` rather than copied into each project.
 - The production project exposes its internals to its own suite only: `<InternalsVisibleTo Include="<Project>.Tests" />`. The domain stays `internal`; nothing is made public for a test's sake.
-- The test namespace shadows the aggregate the way the module's does (`Pasarela.Raw.Pedidos.Tests` against the type `Pedidos`), so a test file that needs the type aliases it once: `using PedidosAggregate = Pasarela.Raw.Pedidos.Domain.Pedidos;`.
+- The test namespace shadows the aggregate the way the module's does (`Shop.Pedidos.Tests` against the type `Pedidos`), so a test file that needs the type aliases it once: `using PedidosAggregate = Shop.Pedidos.Domain.Pedidos;`.
 
 ## Names
 
