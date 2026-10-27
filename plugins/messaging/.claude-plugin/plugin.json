@@ -1,7 +1,7 @@
 {
   "name": "messaging",
   "description": "Asynchronous messaging principles for any stack and broker: commands vs events, contracts with the major in the topic, every message assumed duplicated and out of order, the version in the data with a strict newer-wins guard, optimistic concurrency on the write, retries owned by the broker, and malformed messages parked, not retried.",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "author": {
     "name": "Jorge Costa Maciá",
     "email": "costamaciajorge@gmail.com"
