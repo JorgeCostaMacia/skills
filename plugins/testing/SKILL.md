@@ -50,6 +50,8 @@ The shape follows **cost**: the higher you go, the slower the feedback and the v
 
 Meszaros documents three ways to organize tests: a class per production class, a class per feature of it, a class per fixture. **We take the first**: each test file exercises exactly **one** unit, so a reader sees at a glance what is covered and the test tree mirrors production. Per feature only when a class has grown several independent behaviours — and then ask whether the class should split; per fixture never: it groups by setup and hides which unit is tested, and shared infrastructure is the stack's fixture mechanism's job, not the file's. What's forbidden either way is the lumped file testing many units at once: the test-side mirror of the god-class. File *placement* (mirrored tree, colocated specs…) → the stack skill.
 
+**A convention that holds for every unit of a kind is pinned once**, by a test that enumerates the kind — every value object declares its factories, every exception carries a distinct code, every handler is registered — next to the per-unit files, not instead of them. It is not the lumped file: it tests one rule, named as such, and a failure names the unit that broke it. A unit gets its own file the day it has behaviour of its own.
+
 ## Test names are specification — [canon]
 
 A test name states the behavior it verifies: a reader learns the rule without opening the body, and the suite reads as the unit's specification. **One act per test**: a name whose "and" joins two acts is two tests; an "and" joining facets of one act's outcome (returned nothing *and* changed nothing) is one test with several asserts.

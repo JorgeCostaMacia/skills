@@ -28,6 +28,7 @@ Message-driven systems fail in ways synchronous ones don't: messages arrive twic
 
 - Messages are declared in the **service's own contract**, versioned and published on its own; consumers depend on the contract, never on the service.
 - **The contract's major is in the topic/route name** (`<service>.v6.<module>.<action>.event`). A breaking change is a new major: new topics, consumers move when they upgrade, nothing breaks in flight. A minor or patch never moves a topic — keep changes additive.
+- **A field crosses a chain of services producer-first, and nullable.** A consumer ignores what it doesn't know and defaults what it doesn't receive, so a new *optional* field is additive (a minor): the producer's contract and the producer ship together, each consumer follows at its own pace, and the two can deploy in either order — a consumer may even map the column ahead of the contract, filled with nothing until the field arrives. A new *required* field cannot be additive: it lands in the next major, when the consumer moves topic. The store change (a column) goes in before the service that reads it.
 - Routes are names, not code: derived from one base per module, kebab case, `.command` / `.event` suffixes, so a topic, its consumer group and its dead letter can be found from each other.
 
 ## Assume duplicates and disorder — [canon: at-least-once delivery, idempotent receiver; the version guard is our convention]

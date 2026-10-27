@@ -85,7 +85,7 @@ internal sealed class FacturaValidator : AbstractValidator<Factura>
 
 ## The ValidationException
 
-`<X>ValidationException` derives the shared base — `JorgeCostaMacia.Exception`'s `ValidationException`, or the one its base type already extends (`DateTimeValueObjectValidationException`…) — and carries a **fixed GUID code** and the failure list (`ImmutableList<ValidationFailure>`). At an HTTP boundary that list becomes per-field ProblemDetails errors (`JorgeCostaMacia.Http.ProblemDetails` renders it). The rest of a domain's exceptions (`NotFound`, `Exist`) belong to `ddd-net`.
+`<X>ValidationException` derives the shared base — `JorgeCostaMacia.Exception`'s `ValidationException`, or the one its base type already extends (`DateTimeValueObjectValidationException`…) — and carries a **fixed GUID code** (a UUIDv7 minted for that type, never copied — `ddd-net` has the rule and names the test that guards it) and the failure list (`ImmutableList<ValidationFailure>`). At an HTTP boundary that list becomes per-field ProblemDetails errors (`JorgeCostaMacia.Http.ProblemDetails` renders it). The rest of a domain's exceptions (`NotFound`, `Exist`) belong to `ddd-net`.
 
 ## Boundary — standard FluentValidation, when there is one
 

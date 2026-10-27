@@ -60,6 +60,7 @@ public sealed record PedidosExtractCommand : Command
 
 - **Keep both constructors** and keep them in step; the contracts suite (`MessageContract`) proves every message survives the wire and both constructors agree.
 - Payload is primitives and other records — no value objects, no domain types: a contract is a published language, not the model.
+- **A new field is nullable first.** System.Text.Json gives a constructor parameter the JSON doesn't carry its default value, silently — a non-nullable `string` arrives as `null` and dies in the value object — so a field added in a minor is a nullable parameter, `null` by default in the convenience constructor, and becomes required only in the next major. A consumer takes it by bumping the contract's `<PackageVersion>` in `Directory.Packages.props`. **[our convention]** the contracts package and the service that publishes it carry the same version and release together: the topic major is the contract's, and the deployed image says which contract it speaks.
 - Names: commands `<Module><Action>Command` (imperative), events `<Module><Fact>Event` (past tense: `Extracted`, `Loaded`).
 - A `<Module>LoadedEvent` carries the row's previous state as `AggregateLoadedEvent` — the same event type, `null` when the row was created — built before the aggregate is mutated (see `messaging`).
 

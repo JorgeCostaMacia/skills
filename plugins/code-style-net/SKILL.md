@@ -36,7 +36,7 @@ Microsoft's own C# conventions recommend `var` where the type is evident, the co
 
 - **Braces always**, opening brace on its own line; an empty body may close on the same line (`: base(value) { }`, `private Pedidos() { }`), and an empty type body is the `;` form (`public sealed class PostgreSqlCollection : ICollectionFixture<PostgreSqlFixture>;`).
 - **A blank line before `return`** (unless it is the block's only statement).
-- **120 columns is the reference width, and a list is all on one line or all vertical — never mixed** (one element per line, `) : base(…)` on its own line, the break **before** a binary operator). Which lists go vertical is decided by their kind, so it can be checked:
+- **120 columns is the reference width, and a list is all on one line or all vertical — never mixed** (one element per line, `) : base(…)` on its own line, the break **before** a binary operator). Which lists go vertical is decided by their kind, so it can be checked — in `src/` and `test/` alike: a seeded sixteen-argument `Create(…)` kept on one line in a test is exactly where the next field gets inserted by counting nulls:
 
   | List | Rule |
   | --- | --- |
@@ -79,9 +79,10 @@ The `.editorconfig` turns these into build errors, so they are stated here only 
 
 ## Files
 
-- **CRLF** line endings, UTF-8, final newline. A file generated or rewritten by a shell tool is normalized before committing, or `dotnet format` flags every line.
+- **UTF-8 and a final newline for every text file** (`[*]` in `.editorconfig`); trailing whitespace trimmed except where the format gives it meaning (`[*.md]`, where two spaces are a line break).
+- **CRLF for `.cs`**, pinned in `.editorconfig` (`[*.cs] end_of_line = crlf`) and nowhere else. The pin is a hook for `dotnet format`: a `.cs` a shell tool wrote with LF, or left with mixed endings, is rewritten to one ending by the next `dotnet format` run — what keeps the editor quiet on Windows. Every other file is git's: `* text=auto` stores LF and checks out the platform's ending, `.sh` stays LF and `.cmd` / `.ps1` CRLF by attribute, and nothing is normalized by hand.
 - C# indented with 4 spaces; `.csproj` / `.props` / `.targets` with **tabs**.
-- **Run `dotnet format <solution>` before every commit** — using order, whitespace, charset; `--verify-no-changes` is the check-only form CI runs.
+- **Run `dotnet format <solution>` before every commit** — using order, whitespace, charset, line endings. It is the normalizer, not a check: `--verify-no-changes` is the check-only form, the one CI runs after the build. On a Linux runner that check needs `*.cs text eol=crlf` in `.gitattributes`, or the checkout is LF and the CRLF rule flags every file.
 
 ## The gates
 
