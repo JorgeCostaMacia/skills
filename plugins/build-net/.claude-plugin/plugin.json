@@ -1,7 +1,7 @@
 {
   "name": "build-net",
   "description": "How a .NET repository is built, versioned and restored: the three-tier Directory.Build.props, one VersionPrefix per repo and the separately released piece that keeps its own, Central Package Management, a three-day minimum age for third-party versions, the NuGet vulnerability audit as a build gate, global.json, packing metadata for libraries, and a NuGet configuration without credentials.",
-  "version": "1.5.5",
+  "version": "1.5.6",
   "author": {
     "name": "Jorge Costa Maciá",
     "email": "costamaciajorge@gmail.com"
