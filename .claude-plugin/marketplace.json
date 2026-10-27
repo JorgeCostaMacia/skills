@@ -73,7 +73,7 @@
     {
       "name": "bus-net",
       "source": "./plugins/bus-net",
-      "description": "The .NET realization of the messaging principles with the JorgeCostaMacia.Bus family, for every transport: Command/Event records with their two constructors, thin CommandHandler/EventSubscriber adapters, Send/Publish with the incoming transport, the standard retry ladder with ValidationException excluded, retries parked in Quartz and run by bus-jobs, routes and the producer/admin/consumer maps."
+      "description": "The .NET realization of the messaging principles with the JorgeCostaMacia.Bus family, for every transport: Command/Event records with their two constructors, thin CommandHandler/EventSubscriber adapters, Send/Publish with the incoming transport, the standard retry ladder with ValidationException excluded, retries parked in Quartz and run by a separate jobs worker, routes and the producer/admin/consumer maps."
     },
     {
       "name": "bus-kafka-net",
