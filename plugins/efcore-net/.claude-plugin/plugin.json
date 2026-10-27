@@ -1,7 +1,7 @@
 {
   "name": "efcore-net",
   "description": "EF Core conventions for any provider: value objects as ComplexProperty over .Value, keys, explicit column names, a column date kind stated in the mapping, != null in expression trees, sargable half-open date ranges, the token on every call and the FindAsync trap, scoped contexts, and the schema built from the real scripts.",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "author": {
     "name": "Jorge Costa Maciá",
     "email": "costamaciajorge@gmail.com"

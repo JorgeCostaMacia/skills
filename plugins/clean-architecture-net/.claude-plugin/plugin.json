@@ -1,7 +1,7 @@
 {
   "name": "clean-architecture-net",
   "description": "The .NET realization of clean architecture: one project per module with its four layer folders, internal by default with one public *Context per module, the static Add<Module>Context / Map<Module>…Context composition, the host as composition only (ProgramBuilder / ProgramApplication), the published Contracts and Query and the internal Shared kernels, and the composition test.",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "author": {
     "name": "Jorge Costa Maciá",
     "email": "costamaciajorge@gmail.com"
