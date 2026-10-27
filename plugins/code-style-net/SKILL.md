@@ -20,7 +20,7 @@ The style is **enforced, not suggested**: `.editorconfig` + `EnforceCodeStyleInB
 
 ## Explicit types — a deliberate departure from Microsoft's defaults
 
-Microsoft's own C# conventions recommend `var` where the type is evident, the concise `new()` where the variable's type is already written, and collection expressions `[…]` for every collection. This style turns the three off — `var` by the `.editorconfig` analyzer (`csharp_style_var_* = false:warning`), `new()` and `new[]` by a CI grep (the `false` knobs only stop the IDE from generating them; they don't flag what is already written), and `[…]` by review alone today (`dotnet_style_prefer_collection_expression = false` flags nothing either) — because the code is read without an IDE: in a diff, a review or a generated file, a spelled-out type is the only type the reader gets. Everything else about layout follows those same conventions: Allman braces, four spaces, one statement and one declaration per line, a break before a binary operator.
+Microsoft's own C# conventions recommend `var` where the type is evident, the concise `new()` where the variable's type is already written, and collection expressions `[…]` for every collection. This style turns the three off — `var` by the `.editorconfig` analyzer (`csharp_style_var_* = false:warning`), `new()` and `new[]` by a CI grep (the `false` knobs only stop the IDE from generating them; they don't flag what is already written), and `[…]` by a second grep (`dotnet_style_prefer_collection_expression = false` flags nothing either) — because the code is read without an IDE: in a diff, a review or a generated file, a spelled-out type is the only type the reader gets. Everything else about layout follows those same conventions: Allman braces, four spaces, one statement and one declaration per line, a break before a binary operator.
 
 - **No `var`.** `Pedidos aggregate = …`, `List<Command> commands = …`.
 - **No target-typed `new()`** — `new PedidosExtractService(context)`, never `new(context)`. The analyzer can't flag it; a CI grep guard does:
@@ -30,7 +30,11 @@ Microsoft's own C# conventions recommend `var` where the type is evident, the co
   ```
 
   (`: new()` — the generic constraint — is the one allowed form.)
-- **No collection expressions** `[]`, no implicit `new[] { … }`: `new List<string>()`, `new string[] { "a", "b" }`, `Array.Empty<T>()`, `ImmutableList.Create(...)`. The grep catches `new[]`; a `[…]` only a reviewer catches, until the grep learns it.
+- **No collection expressions** `[]`, no implicit `new[] { … }`: `new List<string>()`, `new string[] { "a", "b" }`, `Array.Empty<T>()`, `ImmutableList.Create(...)`. The first grep catches `new[]`; a second one catches `[…]` — a `[` opened right after `=`, `=>`, `return`, `(` or `,` and closed before `;`, `,` or `)`, or a `[` left at the end of an assignment or alone on its line (a multi-line one, Allman style). Attributes, indexers, array types and list patterns never match it:
+
+  ```bash
+  grep -rnE '(=|=>|return|\(|,)[[:space:]]*\[[^]]*\][[:space:]]*[;,)]|(=|=>|return)[[:space:]]*\[[[:space:]]*$|^[[:space:]]*\[[[:space:]]*$' --include='*.cs' --exclude-dir=obj --exclude-dir=bin src test
+  ```
 
 ## Shape
 
@@ -44,7 +48,7 @@ Microsoft's own C# conventions recommend `var` where the type is evident, the co
   | The **construction** of a message, event, exception or domain object: `new …Event(…)`, an exception's `) : base(…)`, `Create(…)` / `From(…)` | **Vertical always**, even when it fits: these are the lists that grow, so adding a field changes one line |
   | Any other call, initializer or boolean chain — infrastructure base calls included (a converter's, a worker's), and the fixed metadata a message record hands to its base — a bus message's `) : base(aggregateId, aggregateCorrelationId, aggregateOccurredAt, aggregateConsumers)`, an HTTP request's or response's tracing ids — which no field ever joins | **By width**: one line when it fits in 120, vertical when it doesn't (`Send(commands, transport, token)` and `PushProperty(name, value)` stay on their line) |
 
-  A single expression with no natural break (a route constant, an interpolated string) may exceed the width. **Comments follow the same width**: a `///` or `//` line over 120 is split at a word boundary, same prefix and indentation — the content of a `<code>` block excepted. No tool enforces any of this — `dotnet format` doesn't wrap — so it is on whoever writes the code, generators included; the mechanical version is CSharpier, which collapses whatever fits its width, and is adopted only accepting that.
+  A **one-parameter** declaration that does not fit breaks before its `=>` (or its `: base(…)`) and keeps the parameter on its line: one parameter is not a list, and only a signature that still overflows puts it on a line of its own. A single expression with no natural break (a route constant, an interpolated string) may exceed the width. **Comments follow the same width**: a `///` or `//` line over 120 is split at a word boundary, same prefix and indentation — the content of a `<code>` block excepted. No tool enforces any of this — `dotnet format` doesn't wrap — so it is on whoever writes the code, generators included; the mechanical version is CSharpier, which collapses whatever fits its width, and is adopted only accepting that.
 - Expression-bodied members (`=>`) for one-liners; a block when there is more than one statement.
 - Prefer a `using` over full qualification; `global using`s only for what every file needs.
 
