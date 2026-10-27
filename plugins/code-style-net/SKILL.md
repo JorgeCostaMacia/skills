@@ -41,8 +41,8 @@ Microsoft's own C# conventions recommend `var` where the type is evident, the co
   | List | Rule |
   | --- | --- |
   | A method or constructor **declaration** with two or more parameters | **Vertical always**, even when it fits — except a pair that is the thing itself (a range's `start` and `end`, a context's `services` and `configuration`) |
-  | The **construction** of a message, event, exception or domain object: `new …Event(…)`, `) : base(…)`, `Create(…)` / `From(…)` | **Vertical always**, even when it fits: these are the lists that grow, so adding a field changes one line |
-  | Any other call, initializer or boolean chain | **By width**: one line when it fits in 120, vertical when it doesn't (`Send(commands, transport, token)` and `PushProperty(name, value)` stay on their line) |
+  | The **construction** of a message, event, exception or domain object: `new …Event(…)`, an exception's `) : base(…)`, `Create(…)` / `From(…)` | **Vertical always**, even when it fits: these are the lists that grow, so adding a field changes one line |
+  | Any other call, initializer or boolean chain — infrastructure base calls included (a converter's, a worker's), and the fixed metadata a message record hands to the bus base, `) : base(aggregateId, aggregateCorrelationId, aggregateOccurredAt, aggregateConsumers)`, which no field ever joins | **By width**: one line when it fits in 120, vertical when it doesn't (`Send(commands, transport, token)` and `PushProperty(name, value)` stay on their line) |
 
   A single expression with no natural break (a route constant, an interpolated string) may exceed the width. **Comments follow the same width**: a `///` or `//` line over 120 is split at a word boundary, same prefix and indentation — the content of a `<code>` block excepted. No tool enforces any of this — `dotnet format` doesn't wrap — so it is on whoever writes the code, generators included; the mechanical version is CSharpier, which collapses whatever fits its width, and is adopted only accepting that.
 - Expression-bodied members (`=>`) for one-liners; a block when there is more than one statement.
