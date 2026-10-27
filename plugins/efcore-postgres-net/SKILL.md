@@ -39,8 +39,8 @@ entity
 
 ## Collation, schemas, names
 
-- The model declares the database collation — `modelBuilder.UseCollation("es_ES.UTF8")` — so ordering and comparisons agree with the store's.
-- **One schema per layer** (`raw`, `std`, `ods`…): `ToTable("pedidos", "raw")`. Tables and columns in snake_case, constraints named (`pk_pedidos`).
+- The model declares the database's collation — `modelBuilder.UseCollation("<the store's collation>")`, e.g. `"es_ES.UTF8"` — so ordering and comparisons agree with the store's.
+- **One schema per store**, never `public`: `ToTable("pedidos", "<schema>")`. Tables and columns in snake_case, constraints named (`pk_pedidos`).
 - The schema scripts are idempotent (`CREATE … IF NOT EXISTS`) and run in order: schema, tables, indexes — then `migrations/`, in name order (`ALTER TABLE … ADD COLUMN IF NOT EXISTS …`; see `efcore-net`).
 - **String columns are `text`.** Postgres stores `text` and `varchar(n)` the same way; a bound in the type is a rule enforced by the store, with a `22001` instead of the typed `ValidationException`, and changing it is an `ALTER`. The rule lives in the value object's validator, and there is no `HasMaxLength` on a Postgres mapping — with an explicit `text` it does nothing.
 
