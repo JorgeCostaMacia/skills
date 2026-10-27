@@ -44,7 +44,7 @@ Microsoft's own C# conventions recommend `var` where the type is evident, the co
   | The **construction** of a message, event, exception or domain object: `new …Event(…)`, `) : base(…)`, `Create(…)` / `From(…)` | **Vertical always**, even when it fits: these are the lists that grow, so adding a field changes one line |
   | Any other call, initializer or boolean chain | **By width**: one line when it fits in 120, vertical when it doesn't (`Send(commands, transport, token)` and `PushProperty(name, value)` stay on their line) |
 
-  A single expression with no natural break (a route constant, an interpolated string) may exceed the width. No tool enforces any of this — `dotnet format` doesn't wrap — so it is on whoever writes the code, generators included; the mechanical version is CSharpier, which collapses whatever fits its width, and is adopted only accepting that.
+  A single expression with no natural break (a route constant, an interpolated string) may exceed the width. **Comments follow the same width**: a `///` or `//` line over 120 is split at a word boundary, same prefix and indentation — the content of a `<code>` block excepted. No tool enforces any of this — `dotnet format` doesn't wrap — so it is on whoever writes the code, generators included; the mechanical version is CSharpier, which collapses whatever fits its width, and is adopted only accepting that.
 - Expression-bodied members (`=>`) for one-liners; a block when there is more than one statement.
 - Prefer a `using` over full qualification; `global using`s only for what every file needs.
 
