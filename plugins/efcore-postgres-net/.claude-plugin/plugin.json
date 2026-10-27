@@ -1,7 +1,7 @@
 {
   "name": "efcore-postgres-net",
   "description": "EF Core on PostgreSQL with Npgsql: xmin as a shadow row version for optimistic concurrency, the legacy timestamp switch with timestamp without time zone kept on purpose, microsecond precision, the database collation, one schema per layer, and indexes only on foreign keys.",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "author": {
     "name": "Jorge Costa Maciá",
     "email": "costamaciajorge@gmail.com"
