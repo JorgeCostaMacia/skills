@@ -20,9 +20,11 @@ find plugins -name plugin.json -path "*/.claude-plugin/*" \
   -exec sed -i 's/"version": "[^"]*"/"version": "<version>"/' {} +
 ```
 - Use git's **default merge message** (`--no-ff --no-edit`, never `-m`).
-- Commits use Jorge's **personal** identity; **no** `Co-Authored-By` / Claude / Anthropic trailer.
+- Commit with the identity git already has for this repo (its own, set at repo level); **no** `Co-Authored-By` / Claude / Anthropic trailer.
 - Branch prefixes only: `feature` / `bugfix` / `release` / `hotfix`.
 
 ## Adding a skill
 
-See [CONTRIBUTING.md](CONTRIBUTING.md): create `plugins/<plugin>/SKILL.md` (+ optional `plugin.json`), register it in `.claude-plugin/marketplace.json`, add a row to `README.md`.
+See [CONTRIBUTING.md](CONTRIBUTING.md): create `plugins/<plugin>/SKILL.md` and its `.claude-plugin/plugin.json` (name, description, the lockstep version, author, and — for a stack skill — `dependencies` on the generic skills it realizes), register it in `.claude-plugin/marketplace.json` with the same description, add a row to `README.md`.
+
+Two kinds of skill, kept apart on purpose: the **generic** ones (`solid`, `clean-architecture`, `ddd`, `testing`, `logging`, `messaging`, `gitflow`, `pnpm`) state principles for any stack and never name a `-net` skill or a .NET type; each **`-net`** skill is the .NET realization of one of them and depends on it. Library mechanics (what `JorgeCostaMacia.*` does inside) stay in the libraries' READMEs; a skill says how the code uses them.

@@ -12,11 +12,11 @@ A smell is a **signal to investigate**, not an order to refactor. For each: what
   *Fine when:* it's cohesive — one concern with a wide but uniform surface.
 - **Long parameter list** — data that always travels together passed one by one.
   *Fix:* introduce the missing type (parameter object / value object).
+  *Fine when:* the parameters are the entity's own fields — its factory, or a use case that only hands them to it. Grouping them would invent a type that merely repeats the entity.
 - **Data clumps** — the same group of fields repeats across signatures/classes.
   *Fix:* same — name the concept.
 - **Primitive obsession** — rules attached to raw strings/ints scattered across callers.
   *Fix:* value object that validates on creation; invalid values become unrepresentable.
-  *Fine when:* the value has no rules — don't wrap for ceremony.
 
 ## Change amplifiers
 

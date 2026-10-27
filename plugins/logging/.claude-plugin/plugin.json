@@ -1,0 +1,10 @@
+{
+  "name": "logging",
+  "description": "Application logging principles for any stack: the message as a fixed grouping key, all variable data as structured properties, the level as the outcome, correlation in every scope, a failure logged once where it is handled, and observability over log volume.",
+  "version": "1.5.0",
+  "author": {
+    "name": "Jorge Costa Maciá",
+    "email": "costamaciajorge@gmail.com"
+  },
+  "license": "MIT"
+}

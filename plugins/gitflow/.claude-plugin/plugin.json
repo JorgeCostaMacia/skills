@@ -1,7 +1,7 @@
 {
   "name": "gitflow",
-  "description": "Jorge's GitFlow workflow for branches and releases.",
-  "version": "1.4.0",
+  "description": "A GitFlow workflow for branches and releases: feature/bugfix/release/hotfix start and finish, SemVer tags, default merge messages, commit identity, and the phased-publish caveat.",
+  "version": "1.5.0",
   "author": {
     "name": "Jorge Costa Maciá",
     "email": "costamaciajorge@gmail.com"

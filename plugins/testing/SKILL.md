@@ -22,6 +22,8 @@ Canon-anchored: sections marked **[canon]** state the standard; **[our conventio
 
 A use case, rule, or fix without tests **doesn't exist**. Tests are part of the change — same commit, same PR, same definition of done — never a follow-up task.
 
+The one exception: a **thin driving adapter** — one that only unpacks its input and calls a use case, with no rule of its own — may go without a unit test of its own. The composition test proves it is wired, and it is watched in production until it has behaved. Anything holding a rule is tested.
+
 ## The loop — [canon: red-green-refactor]
 
 1. **Red** — write the failing test that states the expected behavior. Name it first: if you can't name it, you don't know what you're building yet.
@@ -39,18 +41,20 @@ A use case, rule, or fix without tests **doesn't exist**. Tests are part of the 
 ```
 
 - **Unit**: one unit in isolation — fast, no infrastructure, pinpoint failures.
-- **Integration**: pieces collaborating with real infrastructure — a real database, a real broker, a module's wiring.
+- **Integration**: pieces collaborating with real infrastructure — a real database, a real broker, a module's wiring. **[our convention]** That infrastructure is built from the **same artifacts production runs** — its schema scripts or migrations — never generated from the code's own model: a generated schema agrees with the mapping by construction, so a mapping that drifted from the real tables would still pass.
 - **E2E**: the deployed system through its public surface.
 
 The shape follows **cost**: the higher you go, the slower the feedback and the vaguer the diagnosis — so most checks live at the bottom and only critical paths at the top. It's a **guide, not a mandate**: not every project needs all three levels, and the right proportion is each stack/project's call. What the pyramid actually forbids is **inverting it** — thousands of e2e tests over a handful of unit tests, where every change costs a full slow run to validate.
 
-## One test file per unit under test — [canon, via SRP]
+## One test file per unit under test — [our convention: Meszaros' Testcase Class per Class]
 
-Each test file exercises exactly **one** unit. With single-responsibility units (see `solid`), per-unit equals per-behavior — the form every school converges on. What's forbidden is the lumped file testing many units at once: it hides which units are covered, and it's the test-side mirror of the god-class. File *placement* (mirrored tree, colocated specs…) → the stack skill.
+Meszaros documents three ways to organize tests: a class per production class, a class per feature of it, a class per fixture. **We take the first**: each test file exercises exactly **one** unit, so a reader sees at a glance what is covered and the test tree mirrors production. Per feature only when a class has grown several independent behaviours — and then ask whether the class should split; per fixture never: it groups by setup and hides which unit is tested, and shared infrastructure is the stack's fixture mechanism's job, not the file's. What's forbidden either way is the lumped file testing many units at once: the test-side mirror of the god-class. File *placement* (mirrored tree, colocated specs…) → the stack skill.
+
+**A convention that holds for every unit of a kind is pinned once**, by a test that enumerates the kind — every value object declares its factories, every exception carries a distinct code, every handler is registered — next to the per-unit files, not instead of them. It is not the lumped file: it tests one rule, named as such, and a failure names the unit that broke it. A unit gets its own file the day it has behaviour of its own.
 
 ## Test names are specification — [canon]
 
-A test name states the behavior it verifies: a reader learns the rule without opening the body, and the suite reads as the unit's specification. If the name needs "and", it's two tests.
+A test name states the behavior it verifies: a reader learns the rule without opening the body, and the suite reads as the unit's specification. **One act per test**: a name whose "and" joins two acts is two tests; an "and" joining facets of one act's outcome (returned nothing *and* changed nothing) is one test with several asserts.
 
 The *format* is per school and per stack tooling — all equivalent realizations of the same canon: `MethodName_StateUnderTest_ExpectedBehavior` (Osherove), `Should_X_When_Y`, Given-When-Then (BDD), `describe/it` sentences (JS). Each stack skill fixes its idiomatic one.
 
@@ -59,9 +63,9 @@ The *format* is per school and per stack tooling — all equivalent realizations
 - **Arrange – Act – Assert**, visually separated. One behavior per test; several asserts are fine when they verify facets of the same outcome.
 - Tests are **independent and order-agnostic**: no shared mutable state, no dependence on execution order; each test builds what it needs.
 - Shared builders/fixtures stay close to the tests that use them — a test file reads top-to-bottom without hunting elsewhere.
-- No timing-based tests: inject the clock / control the scheduler. A sleep in a test is a flake with a countdown.
+- No timing-based tests: inject the clock / control the scheduler — or, where the code reads the clock itself, assert the instant against a window captured just before and just after the call. A sleep in a test is a flake with a countdown.
 
-## Test data: Object Mother + Builder — [canon: Meszaros; our default]
+## Test data: Object Mother + Builder — [canon: Schuh & Punke's Object Mother, Pryce's Test Data Builder; our default]
 
 Two complementary patterns build the Arrange, with a clear division of labour — reach for them instead of hand-constructing objects inline in every test:
 
@@ -71,7 +75,7 @@ Two complementary patterns build the Arrange, with a clear division of labour �
 
 The guardrail: **a mother names a STATE, not a field tweak.** `Invoices.Overdue()` — yes; `Customers.PremiumButNoEmail()` — no, that's the builder's job. Once mother names start carrying `WithX`, the variation belongs in the builder. Well-segregated units (see `solid`) have few meaningful states, so the mother set stays small on its own.
 
-Concrete form and placement — static classes, naming, where the mothers/builders live — are the stack skill's call.
+Concrete form and placement — static classes, naming, where the mothers/builders live — are the stack skill's call, and so is the builder's shape: a fluent type, or optional parameters on the mother's method, realize the same pattern.
 
 ## Behavior over implementation — [canon: classicist school]
 
@@ -95,5 +99,7 @@ Never mock the thing under test — a partially-mocked SUT tests the mock, not t
 
 - Line coverage says a line *executed*; it doesn't say its behavior was *verified*. The question that matters: **"if someone deletes this rule, does a test go red?"** If not, the rule is uncovered — whatever the percentage says. (Mutation testing automates exactly this question.)
 - Every business rule and every validation gets its **failing case** — including the red side of each validation rule.
-- Edge cases are first-class: null/empty, boundaries (0, 1, max), invalid input, duplicates, out-of-order/idempotency where messages are consumed.
+- Edge cases are first-class: null/empty, boundaries (0, 1, max), invalid input, duplicates, out-of-order/idempotency where messages are consumed. **Every bound from both sides** — the last value accepted and the first rejected — so neither the operator nor the limit can drift.
+- **Seed known data, assert real values**: exact counts, the ids returned, the stored fields — never just "not null" or "not empty", which an empty store or a wrong query also satisfies.
+- **A filter needs its negative case**: data that must be left out, asserted absent. A predicate that matches everything passes every positive test.
 - Don't chase 100% line coverage through assertion-free or trivial tests — a covered line with no meaningful assert is worse than an uncovered one: it looks safe.
