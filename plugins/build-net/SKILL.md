@@ -47,7 +47,8 @@ The conventions every repo follows; how MSBuild itself works is the `dotnet-msbu
 
 - **A third-party version lands only once it is three days old.** A trojanized release from a hijacked account is typically detected and pulled within that window — the same rule `pnpm` applies with `minimumReleaseAge`, but NuGet has no setting for it, so it is applied at bump time: the version's date is on its nuget.org page, or `published` in `https://api.nuget.org/v3/registration5-semver1/<id>/<version>.json` (the id lowercase).
 - **Exempt: the packages you or your organization publish** — your own libraries and your contracts land the day they ship.
-- **Exempt: the fix for an advisory the audit already raises.** A known vulnerability breaking the build outweighs the hypothetical risk of a fresh version; take the fix and note why it skipped the wait.
+- **Exempt: the fix for a known vulnerability** — one the audit already raises, or one the publisher's release notes announce as a security fix before the advisory database lists it (Microsoft's monthly .NET patches name their CVEs). A known vulnerability outweighs the hypothetical risk of a fresh version: take the fix the day it ships, and note why it skipped the wait.
+- **The wait is the default, not a lock.** Any other case that cannot wait is a decision someone takes, with its reason written in the commit — never a silent bump.
 - A dependency releasing patches in quick succession is the case the wait exists for: the next day's patch often fixes today's.
 - `dotnet list <solution> package --outdated` lists what can move; every candidate still goes through the age check.
 
