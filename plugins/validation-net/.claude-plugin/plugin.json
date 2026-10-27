@@ -1,7 +1,7 @@
 {
   "name": "validation-net",
   "description": "The .NET realization of validation with FluentValidation, for anything that gets validated: one validator and one exception per validated thing, per-call validators from DI or static Create() chains, composition with Include/SetValidator, every rule evaluated (no Cascade), rule and message conventions, optional boundary validators, and use-case preconditions in Application.",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "author": {
     "name": "Jorge Costa Maciá",
     "email": "costamaciajorge@gmail.com"
