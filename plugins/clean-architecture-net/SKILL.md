@@ -35,9 +35,9 @@ test/
 └─ <Service>.<Module>.Tests/      one suite per project (an API with endpoint-only modules: one suite for the host)
 ```
 
-- **The layers are folders inside the module's project**, not projects of their own: the dependency rule is held by review and by the namespaces, and a module stays one unit to add, move or delete. A module holds **the layers it needs**: a worker's module has the four; a webhook module that only turns a request into an event has `Presentation/` alone. A module's `.csproj` references contracts packages — its own and those it consumes — and the service's shared kernels it uses, never another module's project.
+- **The layers are folders inside the module's project**, not projects of their own: the dependency rule of `clean-architecture` (Domain imports nothing from the other folders, Application only Domain, Infrastructure and Presentation only inward and never each other) is held by review and by the namespaces, and a module stays one unit to add, move or delete. A module holds **the layers it needs**: a worker's module has the four; a webhook module that only turns a request into an event has `Presentation/` alone. A module's `.csproj` references contracts packages — its own and those it consumes — and the service's shared kernels it uses, never another module's project.
 - **The host references every module project** and nothing else of theirs but their `<Module>Context`.
-- The module is named in the ubiquitous language (`Pedidos`, `Expedientes`), and so is its aggregate — which makes `Pedidos` both the namespace segment and the type. Inside the module the type is reached as `Domain.Pedidos` where the namespace would shadow it, and the module's contracts context as `Contracts.Pedidos.PedidosContext`, since the runtime's own `PedidosContext` hides it. Both forms are the convention, not a smell. `Contracts`, `Query` and `Shared` are **reserved segments**: no module may take one as its name.
+- The module is named in the ubiquitous language (`Pedidos`, `Expedientes`), and so is its aggregate — which makes `Pedidos` both the namespace segment and the type. Inside the module the type is reached as `Domain.Pedidos` where the namespace would shadow it, and the module's contracts context as `Contracts.Pedidos.PedidosContext`, since the runtime's own `PedidosContext` hides it. Both forms are the convention, not a smell — in `src/`; the `using PedidosAggregate = …` alias is the tests' idiom (see `testing-net`), not production's. `Contracts`, `Query` and `Shared` are **reserved segments**: no module may take one as its name.
 
 ## Internal by default
 
@@ -72,6 +72,10 @@ public static class PedidosContext
 - **`Map<Module>…Context(...)`** maps the module's driving adapters: `Map<Module>BusContext(consumer)` for its bus handlers, `Map<Module>HttpContext(endpoints)` for its endpoints (a `MapGroup` per module).
 - **Configuration is read where it is used**, and a missing required value fails at startup with a clear message (`GetConnectionString("X") ?? throw new InvalidOperationException("Connection string 'X' is null.")`).
 - Each method returns what it received, so the host chains them.
+
+## Application services
+
+A use case is one `internal sealed class <Module><UseCase>Service`, registered scoped, with one public entry point. It takes **primitives** — the values the adapter unpacked from its message or request — plus the correlation id and the consumers, and a `CancellationToken cancellationToken = default` last; it builds the aggregate through `Domain.<X>.Create(…)`, so every path validates the same way; works through the module's `DbContext`; takes one `DateTime now = DateTime.UtcNow` at its start; and **returns** what the adapter then sends or publishes (commands, events, the aggregate). It never receives the transport's object, and never sends or publishes itself.
 
 ## The host — composition only
 

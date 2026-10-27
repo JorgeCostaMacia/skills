@@ -38,16 +38,17 @@ The .NET *how* of `testing` (load it for the *why*). xUnit v3 is the framework; 
 - `test/<Project>.Tests/Support/` — fixtures, test-data helpers and fakes, next to the tests that use them.
 - `test/Directory.Build.props` — the configuration every test project shares: it imports the root props, sets `IsPackable`/`IsPublishable` false and `OutputType` `Exe`, references `xunit.v3` and the runner, adds `<Using Include="Xunit" />`, and copies whatever the suites run against (the schema scripts) to the output. A helper every suite needs is compiled in with `<Compile Include="…\Shared\X.cs" Link="Shared\X.cs" />` rather than copied into each project.
 - The production project exposes its internals to its own suite only: `<InternalsVisibleTo Include="<Project>.Tests" />`. The domain stays `internal`; nothing is made public for a test's sake.
+- The test namespace shadows the aggregate the way the module's does (`Pasarela.Raw.Pedidos.Tests` against the type `Pedidos`), so a test file that needs the type aliases it once: `using PedidosAggregate = Pasarela.Raw.Pedidos.Domain.Pedidos;`.
 
 ## Names
 
-`Method_StateUnderTest_ExpectedBehavior`, the method being the unit's public entry point: `Extract_WithoutADate_ReturnsTheCountOfTheTable`, `Create_OnAnEmptyCorrelationId_ThrowsValidationException`. One act per test: an "And" joining two acts is two tests; one joining facets of a single outcome (`Load_WithNoIds_ReturnsEmptyAndDeactivatesNothing`) is one.
+`Method_StateUnderTest_ExpectedBehavior`, the method being the unit's public entry point: `Extract_WithoutADate_ReturnsTheCountOfTheTable`, `Load_WithAnEmptyCorrelationId_ThrowsValidationExceptionAndDeactivatesNothing`. One act per test: an "And" joining two acts is two tests; one joining facets of a single outcome (`Load_WithNoIds_ReturnsEmptyAndDeactivatesNothing`) is one.
 
 ## Cancellation
 
 Pass **`TestContext.Current.CancellationToken`** to every async call a test makes — the run's own token, so an aborted run stops its queries. Analyzer **xUnit1051** flags a call that omits it (an error under `TreatWarningsAsErrors`).
 
-xUnit1051 only sees calls written in a test method. A helper that calls the code under test takes the token as a **required** parameter (no `= default`) and passes it on — otherwise propagation stops silently at exactly the seam every test goes through.
+xUnit1051 only sees calls written in a test method. A helper that calls the code under test takes the token as a **required** parameter (no `= default`) and passes it on — otherwise propagation stops silently at exactly the seam every test goes through. Required and **last** — which is why such a helper has no optional parameter: C# puts the optionals after every required one (`CS1737`), and the token does not move (CA1068's rule, held by convention: the gates don't enforce it). Variation lives in the mother instead — see *Test data*.
 
 ## Integration tests on real infrastructure — Testcontainers
 
@@ -63,16 +64,19 @@ public sealed class PostgreSqlFixture : IAsyncLifetime
         await using XContext context = NewContext();
         foreach (string script in new string[] { "schema.sql", "tables.sql", "indexes.sql" })
         {
-            await context.Database.ExecuteSqlRawAsync(
-                await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "database", script), TestContext.Current.CancellationToken),
+            string sql = await File.ReadAllTextAsync(
+                Path.Combine(AppContext.BaseDirectory, "database", script),
                 TestContext.Current.CancellationToken);
+            await context.Database.ExecuteSqlRawAsync(sql, TestContext.Current.CancellationToken);
         }
     }
 
     public async ValueTask DisposeAsync() => await _container.DisposeAsync();
 
     internal XContext NewContext()
-        => new XContext(new DbContextOptionsBuilder<XContext>().UseNpgsql(_container.GetConnectionString()).Options);
+        => new XContext(new DbContextOptionsBuilder<XContext>()
+            .UseNpgsql(_container.GetConnectionString())
+            .Options);
 
     internal async Task ResetAsync()
     {
@@ -97,9 +101,16 @@ public sealed class PostgreSqlCollection : ICollectionFixture<PostgreSqlFixture>
 A static `<Unit>TestDatabase` (or mother) in `Support/` gives the Arrange its vocabulary:
 
 - the **canonical values** every seeded row carries (an instant, a seeded and a changed value of the field under test), so a test can place its input before or after them;
-- **`Entity(id, …)`** — one valid row, with optional parameters only for the axes tests vary (those parameters are the builder `testing` describes, without a fluent type) — and **`Rows(count)`** for slices asserted by id;
+- **`Entity(id, …)`** — one valid row, the module's **one** list of literals, with optional parameters only for the axes tests vary: named at the call site (`Entity(4, metaActive: false)`), so a reader sees what the test varies and nothing else, and each defaulting to the **seeded** value, never to null — absence reaches a test only when it writes it (`Entity(1, estado: null)`). Those parameters are the builder `testing` describes, without a fluent type. **`Rows(count)`** for slices asserted by id;
 - built through **`From`**, not `Create`, so seeding never trips a field rule unrelated to the test;
-- a helper that holds a **long argument list once** (a load with fifty fields), so tests pass only what they vary.
+- a service whose arguments **are the aggregate's fields** (a load with fifty of them) gets a helper that takes the aggregate the mother built and unpacks it — `Load(service, payload, cancellationToken)` calling `service.Load(payload.Id, payload.Estado?.Value, …, cancellationToken)` — so the literals live once, in `Entity`, and a new field is one optional parameter there: no overload, no test touched. A short list is called directly on the service. A long list that is *not* an aggregate takes a test-side parameter object (`init` properties defaulting to the seeded values). A helper that takes the token and bare axes keeps them all required, and a variation some tests need is an overload delegating to the full one — an optional cannot precede the token.
+
+## Convention tests
+
+A rule that holds for every type of a kind is one test over the assembly (see `testing`), not a file per type:
+
+- **Every value object declares its four factories** — `Domain/<Module>ValueObjectsTests.cs`, a `[Theory]` whose `MemberData` lists the module's `IValueObject` types, one case per type, so a failure names the VO. For each, `GetMethod(name, BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)` finds `From`, `FromOrNull`, `Create` and `CreateOrNull` **on the type itself** — `DeclaredOnly` is the point: an inherited one is the base's, answering wrongly — and each returns the type. The same file pins the layer's `Convert` policy for the kind that has one (`From("  x  ")` on every string VO: kept as is in a landing layer, trimmed in a standardizing one). A VO with a rule or a `Convert` of its own keeps its own file beside it.
+- **Every exception carries a distinct code** — in the host's suite, which references every module: each type deriving `DomainException` is constructed through its convenience constructor (an empty failure list where it takes one), its `AggregateCode` read, and the set asserted free of duplicates. Solution-wide on purpose: a generator copies a code across modules.
 
 ## Time
 

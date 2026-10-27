@@ -60,7 +60,9 @@ public sealed record PedidosExtractCommand : Command
 
 - **Keep both constructors** and keep them in step; the contracts suite (`MessageContract`) proves every message survives the wire and both constructors agree.
 - Payload is primitives and other records — no value objects, no domain types: a contract is a published language, not the model.
+- **A new field is nullable first.** System.Text.Json gives a constructor parameter the JSON doesn't carry its default value, silently — a non-nullable `string` arrives as `null` and dies in the value object — so a field added in a minor is a nullable parameter, `null` by default in the convenience constructor, and becomes required only in the next major. A consumer takes it by bumping the contract's `<PackageVersion>` in `Directory.Packages.props`. **[our convention]** the contracts package and the service that publishes it carry the same version and release together: the topic major is the contract's, and the deployed image says which contract it speaks.
 - Names: commands `<Module><Action>Command` (imperative), events `<Module><Fact>Event` (past tense: `Extracted`, `Loaded`).
+- A `<Module>LoadedEvent` carries the row's previous state as `AggregateLoadedEvent` — the same event type, `null` when the row was created — built before the aggregate is mutated (see `messaging`).
 
 ## Handlers and subscribers
 
@@ -96,14 +98,18 @@ Every handler and subscriber is registered with the **same ladder and the same e
 
 ```csharp
 ImmutableList<TimeSpan> retry = ImmutableList.Create(
-    TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(15), TimeSpan.FromMinutes(30),
-    TimeSpan.FromHours(1), TimeSpan.FromHours(12), TimeSpan.FromDays(1));
+    TimeSpan.FromMinutes(5),
+    TimeSpan.FromMinutes(15),
+    TimeSpan.FromMinutes(30),
+    TimeSpan.FromHours(1),
+    TimeSpan.FromHours(12),
+    TimeSpan.FromDays(1));
 ImmutableList<Type> exclude = ImmutableList.Create(typeof(ValidationException));
 ```
 
-- **`ValidationException` (the shared base) is always excluded**: a malformed message is parked at once, never retried. A concurrency failure is *not* excluded — the retry re-decides against the current state. A consumer whose write is not idempotent also excludes the `ExistException` a retry cannot change (see `messaging`).
+- **`ValidationException` (the shared base, `JorgeCostaMacia.Exception.Domain`) is always excluded**: a malformed message is parked at once, never retried. FluentValidation's own `ValidationException` is not that base: a validator that doesn't override `RaiseValidationException` throws the wrong one, and its message climbs the ladder. A concurrency failure is *not* excluded — the retry re-decides against the current state. A consumer whose write is not idempotent also excludes the `ExistException` a retry cannot change (see `messaging`).
 - A step of `TimeSpan.Zero` requeues at once; a positive one is **scheduled** through the retry store.
-- **The retry store is Quartz** (`JorgeCostaMacia.Bus.<Transport>.Retry.Quartz`): `AddQuartz(q => q.WithPostgresDefaults("retry", "JobsBus", "bus"))` plus `AddRetryContext()` — the `retry` scheduler, the `JobsBus` connection, tables prefixed `bus.`. The worker **only parks** retries: it never adds `AddQuartzHostedService`. **bus-jobs** is the worker that starts that scheduler and fires them. Without a retry store a delayed retry cannot be scheduled and the message is parked as terminal.
+- **The retry store is Quartz**: `AddQuartz(q => q.WithPostgresDefaults("retry", "JobsBus", "bus"))` (`WithPostgresDefaults` is `JorgeCostaMacia.Quartz`'s) plus `AddRetryContext()` from `JorgeCostaMacia.Bus.<Transport>.Retry.Quartz` — the `retry` scheduler, the `JobsBus` connection, tables prefixed `bus.`. The worker **only parks** retries: it never adds `AddQuartzHostedService`. **bus-jobs** is the worker that starts that scheduler and fires them. Without a retry store a delayed retry cannot be scheduled and the message is parked as terminal.
 
 ## Routes and the maps
 

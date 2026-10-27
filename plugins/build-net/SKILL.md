@@ -15,7 +15,7 @@ description: >-
 
 # Building .NET repositories
 
-The conventions every repo follows; how MSBuild itself works is the `dotnet-msbuild` skill's. Code style and its gates are `code-style-net`'s.
+The conventions every repo follows; how MSBuild itself works is the `dotnet-msbuild` skill's (from the dotnet/skills marketplace, not this one). Code style and its gates are `code-style-net`'s.
 
 ## Directory.Build.props — three tiers
 
@@ -24,7 +24,7 @@ The conventions every repo follows; how MSBuild itself works is the `dotnet-msbu
   - `TargetFramework`, `ImplicitUsings`, `Nullable`, `AnalysisLevel latest`, `EnforceCodeStyleInBuild`, `TreatWarningsAsErrors`;
   - `IsPackable false` by default — a project packs only by saying so;
   - the vulnerability audit (below).
-- **`src/`** — only where `src` packs (a library): imports the root, then the package output — `GenerateDocumentationFile`, icon, readme, license, SourceLink (`Microsoft.SourceLink.GitHub`), symbols (`snupkg`), `Deterministic`, `ContinuousIntegrationBuild` on CI, and the files packed into every package.
+- **`src/`** — only where `src` packs (a library): imports the root, then the package output — `GenerateDocumentationFile` (on for a library with outside consumers; a contracts repo turns it off on purpose, see `code-style-net`), icon, readme, license, SourceLink (`Microsoft.SourceLink.GitHub`), symbols (`snupkg`), `Deterministic`, `ContinuousIntegrationBuild` on CI, and the files packed into every package.
 - **`test/`** — imports the root, then the test settings (see `testing-net`).
 - Each lower tier starts with `<Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />` — a `Directory.Build.props` does not inherit the one above on its own.
 - **A `.csproj` declares only what is its own**: references, and for a package its `Description` / `PackageTags`. Everything else is inherited — a property repeated in a project is a property that will drift.
@@ -55,7 +55,7 @@ Every restore audits direct **and** transitive packages (`all` is already the de
 
 ## global.json
 
-At the root, selecting the test runner — `{ "test": { "runner": "Microsoft.Testing.Platform" } }` — which xUnit v3 on the current SDK needs for `dotnet test` to run at all (see `testing-net`). Pin an SDK there only with a reason.
+At the root, selecting the test runner — `{ "test": { "runner": "Microsoft.Testing.Platform" } }`. xUnit v3 defaults to VSTest under `dotnet test`, which would need `Microsoft.NET.Test.Sdk`; the test projects carry the MTP runner instead, so without this file `dotnet test` finds nothing (see `testing-net`). Pin an SDK there only with a reason.
 
 ## Feeds
 

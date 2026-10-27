@@ -25,8 +25,9 @@ _logger.LogInformation(GetType().Name);
 
 The class's own name is the grouping key: fixed, unique, and never typed by hand. Use a literal (`"UserLoad"`) only where one class logs more than one event.
 
-- No interpolation (`$"…"`), no `{Placeholder}` templates — Serilog renders those into the message.
+- No interpolation (`$"…"`), no `{Placeholder}` templates: Serilog keeps the template and its properties apart, but what the store groups on is the rendered line, and that is where a placeholder's value lands (see `logging`).
 - Failure: `_logger.LogError(exception, GetType().Name)` — **the exception is the first argument**, so Serilog captures it structured; the message is the same as the success path's, the level tells them apart.
+- Levels keep `logging`'s names through `ILogger` (`Information`, `Warning`, `Error`, `Critical`); Serilog writes `Critical` as `Fatal` — the same level, so a `MinimumLevel` of `Fatal` in configuration is `Critical` in code.
 
 ## Properties — through the log context
 
@@ -46,7 +47,7 @@ using (LogContext.PushProperty("CorrelationId", context.Message.AggregateCorrela
 
 It reads at a glance, and a generated handler stays uniform with every other.
 
-**The same set in several statements — one `PushProperties` helper per class**, so the list lives once and the statements cannot drift apart:
+**The same set in several statements — one `PushProperties` helper per class**, so the list lives once and the statements cannot drift apart (today only the libraries' own loggers log several lines with one set — the bus's does it this way; an application class logs one):
 
 ```csharp
 private static IDisposable PushProperties(
@@ -78,7 +79,7 @@ Every host registers Serilog the same way, in its `ProgramBuilder`:
 ```csharp
 if (builder.Environment.IsDevelopment())
 {
-    Serilog.Debugging.SelfLog.Enable(Console.Error);   // Serilog's own errors (a broken sink, a bad config) to the console
+    Serilog.Debugging.SelfLog.Enable(Console.Error);   // Serilog's own errors (a broken sink, a bad config)
 }
 
 builder.Services.AddSerilog((services, config) => config

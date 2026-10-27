@@ -16,12 +16,13 @@ description: >-
 
 # EF Core in .NET
 
-How the model meets the store, for any provider. The per-aggregate `DbContext` as the aggregate's accessor is `ddd-net`'s; the provider's types, concurrency token and quirks are its own skill's (`efcore-postgres-net`).
+How the model meets the store, for any provider. The per-aggregate `DbContext` as the aggregate's accessor is `ddd-net`'s; the provider's types, concurrency token and quirks are its own skill's (`efcore-postgres-net`). For query **performance** — N+1, tracking, keyset paging, plans — use `optimizing-ef-core-queries` from the dotnet/skills marketplace; two of its remedies yield to the rules here: no `ExecuteUpdate` / `ExecuteDelete` in production code, and indexes only where the provider skill says (foreign keys).
 
 ## Mapping
 
+- **The context's shape is the same everywhere**: `internal class` (not sealed), `virtual` `DbSet`s, and both a parameterless constructor and the `DbContextOptions<T>` one — the shape EF's design-time tooling expects, kept uniform across the family.
 - **One `DbContext` per aggregate**, configured in `OnModelCreating` with one `Entity<X>(entity => …)` block: the table (`ToTable("x", "<schema>")`), the key with a named constraint (`HasKey(e => e.Id).HasName("pk_x")`), then every property — **every column named explicitly** (`HasColumnName("snake_case")`), so a renamed property never renames a column.
-- **Value objects map as `ComplexProperty` over their `.Value`**, `IsRequired(false)` on the optional ones:
+- **Value objects map as `ComplexProperty` over their `.Value`**, `IsRequired(false)` on the optional ones (an optional complex type needs EF Core 10 or later):
 
   ```csharp
   entity
@@ -36,7 +37,9 @@ How the model meets the store, for any provider. The per-aggregate `DbContext` a
 - **`ValueGeneratedNever()`** on values the application assigns — the key and every column — so EF never expects the store to generate them.
 - **Keys.** A complex property cannot be a key. The identity stays a primitive, or it is a VO mapped with a value converter (`HasConversion`), in which case queries compare the whole VO (`e.Id == id`) and `FindAsync` takes the VO.
 - **What a column means belongs to the mapping**, not to the value object: a converter such as `HasConversion(v => v, v => DateTime.SpecifyKind(v, DateTimeKind.Utc))` tags the dates this layer itself wrote in UTC. Never put it on a column whose zone this layer doesn't know — a source's dates keep the kind they have.
-- A new column goes into the model **and** the schema scripts together.
+- A new column goes into the model **and** the schema scripts together — and, for a table that already exists somewhere, into a migration (see *Against the real schema*).
+- **The model declares no index.** `HasIndex` would only matter to `EnsureCreated`, which is never used; indexes live in the schema scripts, and which ones exist is the provider skill's rule.
+- **A column type describes the store; a rule lives in the domain.** The database is a store: a length, a range or a format is the value object's validator's (`ddd`), never a `HasMaxLength` or a sized column type, which would enforce the rule in the wrong layer with the wrong error. A read-only legacy source keeps the sized types it has — the mapping describes what is there. The provider skill names the house types.
 
 ## Querying
 
@@ -68,4 +71,6 @@ How the model meets the store, for any provider. The per-aggregate `DbContext` a
 
 ## Against the real schema
 
-The schema is the repository's own scripts (or migrations), the ones production runs — never `EnsureCreated`, which builds whatever the model says and so agrees with any mapping. Integration tests build their database from those scripts (see `testing-net`); a column the mapping names but the table lacks fails there, not in production.
+The schema is the repository's own scripts, the ones production runs — never `EnsureCreated`, which builds whatever the model says and so agrees with any mapping. Integration tests build their database from those scripts (see `testing-net`); a column the mapping names but the table lacks fails there, not in production.
+
+The scripts are the **state** — what a new environment gets — and `CREATE … IF NOT EXISTS` never alters a table that exists, so a change to a live table is a **migration**: an idempotent `ALTER` in `database/migrations/<version>.sql`, named after the release that needs it and listed in its notes, run by hand on every environment **before** that version deploys (nothing runs it for you; the service's user has no DDL). Being idempotent, the folder can always be run whole, in order. The test fixture runs it after the state scripts, so a wrong migration fails the suite; a missing one cannot fail there — the tables are born complete — so a change to `tables.sql` is reviewed with its migration beside it. EF migrations are not used: one history per context, times a context per aggregate, for an event that is rare and would end as a hand-run script anyway; `dotnet ef migrations script --idempotent` may *generate* the file.

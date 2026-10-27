@@ -62,8 +62,8 @@ internal sealed record PedidosReferencia : LongValueObject
 }
 ```
 
-- **Declare all four factories, always** — whatever the field's nature. The bases declare all four as public statics, so an undeclared one is still reachable and answers wrongly: `XId.CreateOrNull(5L)` without its own declaration returns the *base* type, validated by the base validator — the field's own rule skipped in silence. `new` is mandatory on each, and the compiler proves it both ways: `CS0108` without it, `CS0109` where nothing is hidden.
-- **Optionality lives in the `OrNull` sibling, never in the return type**: `From`/`Create` always return non-null. The `OrNull` ones branch on **what `From` returned** (`vo?.Validate()`), not on the input — correct even if a `From` ever maps a sentinel to absence. String VOs write `FromOrNull` as `value is null ? null : From(value)` (`string?` has no `.Value`).
+- **Declare all four factories, always** — whatever the field's nature. The bases declare all four as public statics, so an undeclared one is still reachable and answers wrongly: `XId.CreateOrNull(5L)` without its own declaration returns the *base* type, validated by the base validator — the field's own rule skipped in silence. `new` is mandatory on each, and the compiler proves the *modifier* both ways: `CS0108` without it, `CS0109` where nothing is hidden. It cannot prove a factory is *declared*: an undeclared one resolves to the base's at any call site that doesn't demand the derived type — `XEstado.Create(x).Value` in a predicate compiles and skips the rule. `From`/`FromOrNull` are pinned by the aggregate, whose typed properties refuse the base (`CS0266`); `Create`/`CreateOrNull` on a payload VO have no production caller, so a test pins them — see *Testing this model*.
+- **Optionality lives in the `OrNull` sibling, never in the return type**: `From`/`Create` always return non-null. `FromOrNull` is the one place that looks at the input (`value is null ? null : From(value.Value)`; a string VO writes `From(value)`, since `string?` has no `.Value`). `CreateOrNull` branches on **what `FromOrNull` returned** (`vo?.Validate()`), never on the input again — so it stays correct if a `From` ever maps a sentinel to absence, and never hands the validator a null.
 - **One input type per VO**, the base's natural primitive. A second suffixed overload (`FromOrNull(string?)` and `FromOrNull(int?)`) makes `FromOrNull(null)` ambiguous (`CS0121`); other primitives are converted at the call site.
 - **The validator is reached through one `private void Validate()`**, the local is `vo`.
 
@@ -88,7 +88,7 @@ private static new DateTime Convert(DateTime value)
 
 - **A VO never pulls a value into range.** Out of range is a caller's mistake and its `Create` throws the typed exception.
 - **No `Default` and no public `Max`.** A default is call-site policy; a public bound is an invitation to clamp against it. The bound lives as a literal in the validator, pinned by two tests either side (`Create(1000)` accepted, `Create(1001)` rejected) so it cannot drift.
-- **A base rejects only what is not the type.** Policy (a range, a format, a closed list) lives in the derived VO's validator.
+- **A base rejects only what is not the type** — and most bases check nothing (`validation-net` lists what each one does). Policy (not empty, a range, a format, a closed list) lives in the derived VO's validator.
 - A bound on "now" is captured when the validator is constructed — per `Create` today. Cache a validator in a static and the clock freezes at process start.
 
 ### A composite value object
@@ -106,7 +106,10 @@ internal sealed class Pedidos : Aggregate
 
     private Pedidos() { }                                   // ORM materialization
 
-    public Pedidos(long id, PedidosReferencia? referencia, PedidosMetaActive metaActive)   // hydration
+    public Pedidos(                                        // hydration
+        long id,
+        PedidosReferencia? referencia,
+        PedidosMetaActive metaActive)
     {
         Id = id;
         Referencia = referencia;
@@ -114,13 +117,25 @@ internal sealed class Pedidos : Aggregate
     }
 
     // FROM cascades: every part through ITS From — nothing validated, nothing thrown yet.
-    public static Pedidos From(long id, long? referencia, bool metaActive)
-        => new Pedidos(id, PedidosReferencia.FromOrNull(referencia), PedidosMetaActive.From(metaActive));
+    public static Pedidos From(
+        long id,
+        long? referencia,
+        bool metaActive)
+        => new Pedidos(
+            id,
+            PedidosReferencia.FromOrNull(referencia),
+            PedidosMetaActive.From(metaActive));
 
     // CREATE seals: one composed validation, one exception with every failure.
-    public static Pedidos Create(long id, long? referencia, bool metaActive)
+    public static Pedidos Create(
+        long id,
+        long? referencia,
+        bool metaActive)
     {
-        Pedidos aggregate = From(id, referencia, metaActive);
+        Pedidos aggregate = From(
+            id,
+            referencia,
+            metaActive);
         aggregate.Validate();
 
         return aggregate;
@@ -133,7 +148,6 @@ internal sealed class Pedidos : Aggregate
 - The root is an `internal sealed class` deriving `Aggregate` (identity, not value semantics — so a class, not a record). Fields that change are `set`; the identity and what never changes after creation are `init`.
 - **The aggregate never calls its parts' `Create`** — that would throw on the first invalid part alone. `From` cascades through the parts' `From`/`FromOrNull`; `Create` validates the whole once (see *Validating the model*).
 - **The nullability of each factory call matches its property**: `XField.FromOrNull(...)` for an optional field, `XField.From(...)` for a required one. Add a field, keep both sides in step.
-- Long parameter lists go one per line (the examples above are compressed).
 
 ## Validating the model
 
@@ -155,12 +169,13 @@ Every value object and every aggregate has its own `<X>Validator` and `<X>Valida
   ```
 
 - A composite value object (two page numbers making a range) validates each part with the part's own validator plus the cross rule (`start <= end`).
+- **Which layer holds a content rule** follows `ddd`: a landing layer's payload VO has a validator that only `Include`s its base's, and the field's rule — a length, a format — lives in the standardizing layer's VO; the landing layer's own rules are on its identity and `Meta*` fields.
 
 ## The exception family
 
 Each concept ships its typed exceptions, one file each, deriving the `JorgeCostaMacia.Exception` bases: `<X>ValidationException` (raised by its validator), `<X>NotFoundException`, `<X>ExistException`.
 
-- Each carries a **fixed GUID code**, a literal in its convenience constructor, so occurrences trace across logs and responses whatever the wording.
+- Each carries a **fixed GUID code**, a literal in its convenience constructor, so occurrences trace across logs and responses whatever the wording. The code is a **UUIDv7** (`Guid.CreateVersion7()`), minted fresh for each exception type by whoever writes the file — never copied from a neighbour: a generator that stamps one GUID into every file it writes leaves seventy exceptions sharing a code that then identifies none of them. Nothing in the language checks it, so the host suite does: one convention test asserts every exception's code is distinct across the solution (see `testing-net`).
 - Two constructors: the full tuple (transport) and the convenience one producers use.
 
 ## Events
@@ -176,4 +191,5 @@ The root collects what happened as `IDomainEvent`s through `AddEvent(...)` — i
 - Composition tests use `From` (it skips the validators and keeps the test free of unrelated field rules); rule tests use `Create`.
 - Every VO with a rule of its own: its red case on the typed exception, and the bound from both sides.
 - `From`/`FromOrNull` both directions on the aggregate: every optional part materialized when supplied, every one null when not.
-- A `Convert` that does something (truncation, pass-through, a kind) has its own test: without it, moving the VO to another base passes everything else.
+- A `Convert` of its own (a truncation, a kind) has its own test: without it, moving the VO to another base passes everything else.
+- **A VO with no rule and no `Convert` of its own has no test file of its own.** What it has to pin is the same for every VO of its kind — the four factories declared on the type and returning it, and the layer's `Convert` policy (a landing layer's strings pass through, a standardizing layer's are trimmed) — so one **convention test per module** enumerates the module's value objects and pins it for all of them (`testing-net` has the realization). The day it gains a rule or a `Convert`, it gains its file.

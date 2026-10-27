@@ -26,13 +26,13 @@ This mirrors the [`gitflow-vscode`](https://github.com/JorgeCostaMacia/gitflow-v
 | Release | `release/<version>` | develop | develop **and** main | `v<version>` |
 | Hotfix | `hotfix/<version>` | main | develop **and** main | `v<version>` |
 
-Branch prefixes are **only** `feature` / `bugfix` / `release` / `hotfix`. Never use `chore/` or anything else as a branch prefix (`chore` is a Conventional-Commits *message* type, not a GitFlow branch).
+Branch prefixes are **only** `feature` / `bugfix` / `release` / `hotfix`. Never use `chore/` or anything else as a branch prefix (`chore` is a Conventional-Commits *message* type, not a GitFlow branch). A hotfix merges into `develop` even while a release branch is open (the original model would merge it into that release instead): that is what the extension does; an open release branch that needs the fix merges `develop` into itself by hand.
 
 ## Validation (reject, don't sanitize)
 
 - **Names** (feature/bugfix): must start with a lowercase letter/digit, then lowercase word chars and `. _ - /`. Reject uppercase, spaces, accents — don't rewrite them.
 - **Versions** (release/hotfix): strict 3-part SemVer (`1.0.0`, optionally `1.0.0-rc1`). The version bump lives **on the `release/X` branch**, not after merging.
-- **Tag** = `v` + version (`2.0.4` → `v2.0.4`). Annotated tags. If the tag message contains markdown `#` headings, create it with `--cleanup=verbatim` (git strips `#` lines as comments otherwise).
+- **Tag** = `v` + version (`2.0.4` → `v2.0.4`). Annotated tags, always created with `--cleanup=verbatim` (git would otherwise strip `#` lines — markdown headings — as comments). A tag that already exists, locally or on origin, means the version was used: pick another, never reuse it.
 
 ## Procedures
 
@@ -58,10 +58,10 @@ Use `git merge --no-ff --no-edit` so the **default** merge message is kept (`Mer
 4. **Bump the package/project version(s) on this branch** and commit. The extension does not bump — this step is yours.
 
 ### Release / Hotfix finish (transactional — develop first)
-1. Working tree clean. `git pull` on `main` and on `develop`, then capture their commits (for rollback).
+1. Working tree clean, and `v<version>` exists neither locally (`git tag -l v<version>`) nor on origin (`git ls-remote --tags origin v<version>`) — checked before anything is merged. `git pull` on `main` and on `develop`, then capture their commits (for rollback).
 2. `git checkout develop && git merge --no-ff --no-edit <branch>`
 3. `git checkout main && git merge --no-ff --no-edit <branch>`
-4. `git tag -a v<version> main -m "Release v<version>"` (`Hotfix v<version>` for a hotfix; richer notes are fine — add `--cleanup=verbatim` if they have `#` headings).
+4. `git tag -a v<version> main --cleanup=verbatim -m "Release v<version>"` (`Hotfix v<version>` for a hotfix; richer notes are fine).
 5. **Atomic push** so the remote updates all refs or none: `git push --atomic origin main develop --tags` (keep the tag on the remote).
 6. Delete the branch, remote first, then local (as in the feature finish).
 7. Leave the repository on `develop`.
