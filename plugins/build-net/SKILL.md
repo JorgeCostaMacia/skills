@@ -59,7 +59,23 @@ At the root, selecting the test runner — `{ "test": { "runner": "Microsoft.Tes
 
 ## Feeds
 
-- `nuget.config` lists the feeds — `nuget.org` and the organization's private feed — with **`packageSourceMapping`** (the organization's own package prefix to its feed, everything else to nuget.org), so a package can only come from the feed it belongs to.
+- **Every repo carries a `nuget.config` at its root**, and it always starts from the same base: `<clear />`, then `nuget.org` mapped to everything:
+
+  ```xml
+  <configuration>
+    <packageSources>
+      <clear />
+      <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
+    </packageSources>
+    <packageSourceMapping>
+      <packageSource key="nuget.org">
+        <package pattern="*" />
+      </packageSource>
+    </packageSourceMapping>
+  </configuration>
+  ```
+
+  `<clear />` drops every source inherited from the user-level and machine configs, so the repo restores the same everywhere, and with Central Package Management a second inherited source would otherwise raise `NU1507` — an error under the gates. A repo that consumes a private feed **extends** the base: one more `<add>`, and its own `packageSource` mapping its package prefix (`<Org>.*`), so a package can only come from the feed it belongs to.
 - **It holds no credentials.** A developer's live in the user-level NuGet config; CI's come from a read-only token in an organization secret, passed as `NuGetPackageSourceCredentials_<FeedName>`.
 - `nuget.config`, `appsettings*.json` and user secrets are never read or rewritten by tooling: hand changes to them to the user.
 - Right after a package is published, a restore that can't find it is usually the HTTP cache — restore with `--no-http-cache` before suspecting the feed.
