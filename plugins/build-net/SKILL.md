@@ -8,9 +8,10 @@ description: >-
   library, configuring the private feed, or when a restore or a build fails
   on the audit gate. It encodes: the three-tier Directory.Build.props, one
   VersionPrefix per repo (and the separately released piece that keeps its
-  own), Central Package Management, the NuGet vulnerability audit as a build
-  gate, global.json, packing metadata for libraries, and a nuget.config that
-  holds no credentials.
+  own), Central Package Management, a three-day minimum age for third-party
+  versions, the NuGet vulnerability audit as a build gate, global.json,
+  packing metadata for libraries, and a nuget.config that holds no
+  credentials.
 ---
 
 # Building .NET repositories
@@ -41,6 +42,14 @@ The conventions every repo follows; how MSBuild itself works is the `dotnet-msbu
 - `Directory.Packages.props` with `ManagePackageVersionsCentrally=true`: every version — third-party, the house libraries, the contracts — is a `<PackageVersion>` there, **alphabetical**. A `.csproj` references packages **without** a version.
 - Projects inside the repo reference each other with `ProjectReference`, never through CPM.
 - Keep the house libraries' versions in step across repos; a stale transitive dependency is caught by the audit, not by a reviewer.
+
+## Updating packages — a minimum release age
+
+- **A third-party version lands only once it is three days old.** A trojanized release from a hijacked account is typically detected and pulled within that window — the same rule `pnpm` applies with `minimumReleaseAge`, but NuGet has no setting for it, so it is applied at bump time: the version's date is on its nuget.org page, or `published` in `https://api.nuget.org/v3/registration5-semver1/<id>/<version>.json` (the id lowercase).
+- **Exempt: the packages you or your organization publish** — your own libraries and your contracts land the day they ship.
+- **Exempt: the fix for an advisory the audit already raises.** A known vulnerability breaking the build outweighs the hypothetical risk of a fresh version; take the fix and note why it skipped the wait.
+- A dependency releasing patches in quick succession is the case the wait exists for: the next day's patch often fixes today's.
+- `dotnet list <solution> package --outdated` lists what can move; every candidate still goes through the age check.
 
 ## The audit gate
 
