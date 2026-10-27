@@ -1,7 +1,7 @@
 {
   "name": "code-style-net",
   "description": "How C# is written, enforced as build errors: explicit types (no var, no target-typed new(), no collection expressions) as a stated departure from Microsoft's defaults, braces always, a 120-column width with all-or-nothing wrapping and growing lists kept vertical, naming and modifier conventions, is null outside expression trees, comments only where the code cannot speak, CRLF, dotnet format before committing, and no NoWarn or pragma.",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "author": {
     "name": "Jorge Costa Maciá",
     "email": "costamaciajorge@gmail.com"

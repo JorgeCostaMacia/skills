@@ -1,7 +1,7 @@
 {
   "name": "bus-kafka-net",
   "description": "How the services use the Kafka transport of the JorgeCostaMacia.Bus family: the topic as the route with the contracts major, partitions declared per service in the admin map, no message key on purpose, the consumer group as a stable contract named after the handler, parked messages in .error, and one broker user per service.",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "author": {
     "name": "Jorge Costa Maciá",
     "email": "costamaciajorge@gmail.com"

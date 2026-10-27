@@ -1,7 +1,7 @@
 {
   "name": "logging-net",
   "description": "The .NET realization of the logging principles with Serilog: GetType().Name as the message, LogContext properties (a using per property for one statement, a PushProperties helper per class for a reused set), destructured payloads, the exception first in LogError, correlation properties in every scope, the pipeline packages, and minimum levels in configuration.",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "author": {
     "name": "Jorge Costa Maciá",
     "email": "costamaciajorge@gmail.com"
