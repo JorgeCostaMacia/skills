@@ -34,7 +34,7 @@ The conventions every repo follows; how MSBuild itself works is the `dotnet-msbu
 ## Versions
 
 - **One `VersionPrefix`, in the root props**, versions what the repo delivers — the service's image, or every package of a library at once (lockstep). No project sets `<Version>`: it would override the prefix.
-- **The exception: a piece released on its own cycle** — a read model packed beside a service (`<Service>.Query`) — declares its own `VersionPrefix` in its `.csproj`, so a release that only changes the service doesn't republish an unchanged package. CI guards it: a change under that project (or what it is built from) since the last tag, without a moved version, fails the build — otherwise a `--skip-duplicate` push would skip it in silence.
+- **A piece released on its own cycle** — the contracts, a read model (`<Service>.Query`) — lives in a repository of its own, with its own root `VersionPrefix`; a service repo never carries a second version inside it.
 - SemVer: a feature is a minor, anything a consumer cannot see (tests, docs, a dependency bump) a patch, a breaking change a major. A version on the feed is never published twice.
 
 ## Central Package Management

@@ -29,8 +29,7 @@ src/
 │  ├─ Infrastructure/             <Module>InfrastructureContext, the DbContext, external clients
 │  ├─ Presentation/               the driving adapters (bus handlers, endpoints) + <Module>…PresentationContext
 │  └─ <Module>Context.cs          the module's only public type
-├─ <Service>.Shared.<X>/          a shared kernel, one per concern — internal, never packed
-└─ <Service>.Query/               the read model, packed with its own version (when the service has one)
+└─ <Service>.Shared.<X>/          a shared kernel, one per concern — internal, never packed
 test/
 └─ <Service>.<Module>.Tests/      one suite per project (an API with endpoint-only modules: one suite for the host)
 ```
@@ -100,7 +99,7 @@ host.Run();
 | Piece | Name | Where | Published |
 | --- | --- | --- | --- |
 | The module's messages — the Published Language | `<Service>.Contracts.<Module>` | its own repository, its own version | yes, a NuGet package per module |
-| The read model | `<Service>.Query` | `src/` of the service, its own `VersionPrefix` | yes, one package |
+| The read model | `<Service>.Query` | its own repository, its own version | yes, one package |
 | A shared kernel | `<Service>.Shared.<X>` | `src/` of the service | **never** — internal to the service |
 
 The service consumes its own contracts as a `PackageReference`, like any other consumer.
