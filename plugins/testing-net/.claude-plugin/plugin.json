@@ -1,7 +1,7 @@
 {
   "name": "testing-net",
   "description": "The .NET realization of the testing principles: xUnit v3 on Microsoft.Testing.Platform, test project layout and shared props, InternalsVisibleTo, naming, TestContext cancellation (xUnit1051), Testcontainers fixtures built from the repo's own scripts, test-data helpers, the clock, the host composition test, WebApplicationFactory host tests with hand-written fakes, and running the suites.",
-  "version": "1.5.7",
+  "version": "1.5.8",
   "author": {
     "name": "Jorge Costa Maciá",
     "email": "costamaciajorge@gmail.com"
