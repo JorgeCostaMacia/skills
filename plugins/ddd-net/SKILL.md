@@ -5,7 +5,7 @@ description: >-
   principles). Use when writing or reviewing C# domain code: value objects
   and their factories, aggregates and their From/Create, the domain exception
   family, collecting events on the root, or giving an aggregate its DbContext. It
-  encodes the JorgeCostaMacia.* base types, the four-factory surface
+  encodes the JorgeCostaMacia.DDD.* base types, the four-factory surface
   (From, FromOrNull, Create, CreateOrNull) and why every one is declared,
   Convert as the one place a value is altered, no coercion and no defaults on
   a value object, the aggregate rule (From cascades, Create seals), and one
@@ -18,14 +18,14 @@ The .NET *how* of the model defined in `ddd` (load it for the *why*). How a vali
 
 ## The base types
 
-The building blocks come from the `JorgeCostaMacia.*` packages; derive from them, don't redeclare them.
+The building blocks come from the `JorgeCostaMacia.DDD.*` packages (the ddd-dotnet repository); derive from them, don't redeclare them.
 
 | Package | Gives |
 | --- | --- |
-| `JorgeCostaMacia.ValueObject` | `StringValueObject`, `IntValueObject`, `LongValueObject`, `DecimalValueObject`, `DateTimeValueObject`, `DateTimeUtcValueObject`, `BoolValueObject`, `UuidValueObject`… — each with its validator and validation exception |
-| `JorgeCostaMacia.Aggregate` | `Aggregate`: the root's base, with `AddEvent` / `PullEvents` |
-| `JorgeCostaMacia.Entity` / `.DomainEvent` | `IEntity`, `IDomainEvent` |
-| `JorgeCostaMacia.Exception` | `NotFoundException`, `ExistException`, `ValidationException`, `ErrorException` — the bases of every family exception, each with a fixed code |
+| `JorgeCostaMacia.DDD.ValueObject` | `StringValueObject`, `IntValueObject`, `LongValueObject`, `DecimalValueObject`, `DateTimeValueObject`, `DateTimeUtcValueObject`, `BoolValueObject`, `UuidValueObject`… — each with its validator and validation exception |
+| `JorgeCostaMacia.DDD.Aggregate` | `Aggregate`: the root's base, with `AddEvent` / `PullEvents` |
+| `JorgeCostaMacia.DDD.Entity` / `.DDD.DomainEvent` | `IEntity`, `IDomainEvent` |
+| `JorgeCostaMacia.DDD.Exception` | `NotFoundException`, `ExistException`, `ValidationException`, `ErrorException` — the bases of every family exception, each with a fixed code |
 
 ## Value objects
 
@@ -173,7 +173,7 @@ Every value object and every aggregate has its own `<X>Validator` and `<X>Valida
 
 ## The exception family
 
-Each concept ships its typed exceptions, one file each, deriving the `JorgeCostaMacia.Exception` bases: `<X>ValidationException` (raised by its validator), `<X>NotFoundException`, `<X>ExistException`.
+Each concept ships its typed exceptions, one file each, deriving the `JorgeCostaMacia.DDD.Exception` bases: `<X>ValidationException` (raised by its validator), `<X>NotFoundException`, `<X>ExistException`.
 
 - Each carries a **fixed GUID code**, a literal in its convenience constructor, so occurrences trace across logs and responses whatever the wording. The code is a **UUIDv7** (`Guid.CreateVersion7()`), minted fresh for each exception type by whoever writes the file — never copied from a neighbour: a generator that stamps one GUID into every file it writes leaves seventy exceptions sharing a code that then identifies none of them. Nothing in the language checks it, so the host suite does: one convention test asserts every exception's code is distinct across the solution (see `testing-net`).
 - Two constructors: the full tuple (transport) and the convenience one producers use.
