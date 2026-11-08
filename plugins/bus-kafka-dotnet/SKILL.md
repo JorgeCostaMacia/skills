@@ -15,7 +15,7 @@ description: >-
 
 # The bus on Kafka — how we use it
 
-The decisions the services make on top of `JorgeCostaMacia.Bus.Kafka`. How the library works inside — its error handling, its throttling defaults, its health checks — is its own README's; this skill is what a service decides.
+The decisions the services make on top of `JorgeCostaMacia.Bus.Kafka`. How the library works inside — its error handling, its throttling defaults, its health checks — is its README's, in [bus-kafka-dotnet](https://github.com/JorgeCostaMacia/bus-kafka-dotnet); this skill is what a service decides.
 
 ## Topics
 

@@ -17,6 +17,8 @@ description: >-
 
 The .NET *how* of `logging` (load it for the *why*). **Serilog is the accepted core coupling** — not wrapped, not replaced. Code logs through an injected `ILogger<T>`; Serilog is the provider behind it.
 
+**The libraries:** the baseline (`JorgeCostaMacia.Serilog`) lives in [serilog-dotnet](https://github.com/JorgeCostaMacia/serilog-dotnet), and the HTTP request and exception logging (`JorgeCostaMacia.Http.Serilog`, `JorgeCostaMacia.Http.Exception.Serilog`) in [http-dotnet](https://github.com/JorgeCostaMacia/http-dotnet). How they work inside is their READMEs'; this skill is how the code logs.
+
 ## The message
 
 ```csharp
