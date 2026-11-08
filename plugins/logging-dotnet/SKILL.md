@@ -25,7 +25,7 @@ The .NET *how* of `logging` (load it for the *why*). **Serilog is the accepted c
 _logger.LogInformation(GetType().Name);
 ```
 
-The class's own name is the grouping key: fixed, unique, and never typed by hand. Use a literal (`"UserLoad"`) only where one class logs more than one event.
+The class's own name is the grouping key: fixed, unique, and never typed by hand. Use a literal (`"UserLoad"`) only where one class logs more than one event. The literal is the event's name in PascalCase — no spaces, no full stop (`"ProducerFailed"`, `"RequestEnd"`) — so every message, a class name or a literal, has one shape in the log store; a library over a framework whose events already have names keeps those (`JobToBeExecuted`, Quartz's own callbacks).
 
 - No interpolation (`$"…"`), no `{Placeholder}` templates: Serilog keeps the template and its properties apart, but what the store groups on is the rendered line, and that is where a placeholder's value lands (see `logging`).
 - Failure: `_logger.LogError(exception, GetType().Name)` — **the exception is the first argument**, so Serilog captures it structured; the message is the same as the success path's, the level tells them apart.
