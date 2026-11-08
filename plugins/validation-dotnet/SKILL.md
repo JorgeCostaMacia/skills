@@ -72,7 +72,7 @@ internal sealed class FacturaValidator : AbstractValidator<Factura>
 ## Writing the rules
 
 - **No `Cascade(CascadeMode.Stop)`.** Every rule runs, so an empty value may report two failures (`NotEmpty` and the `Must`) — accepted. A validator can be included by others; it must not decide how a chain it is part of stops.
-- **A base validator rejects only what is not the type — and most check nothing at all.** `StringValueObjectValidator`, `Int`, `Long`, `Decimal`, `Double`, `Float`, `Bool` and `Byte` carry no rule (an empty string passes); `Uuid` is not empty; `DateTime` is after 1900 and at most a century ahead; `PageNumber` / `PageSize` are above zero; `Email`, `Ipv4`, `Json` and `Uri` check their format. Policy — not empty, a range, a closed list — lives in the validator of the thing that has it, never assumed from the base.
+- **A base validator rejects only what is not the type — and most check nothing at all.** `StringValueObjectValidator`, `Int`, `Long`, `Decimal`, `Double`, `Float`, `Bool` and `Byte` carry no rule (an empty string passes); `Uuid` is not empty; `DateTime` is after 1900 and at most a century ahead, and `DateTimeUtc` includes it; `PageNumber` / `PageSize` are above zero; `GroupBy` and `OrderBy` are not empty, and `OrderType` is one of its closed list; `Email`, `Ipv4` and `Json` check their format; `Uri` is not null — its format is the `Uri` type's own. Policy — not empty, a range, a closed list — lives in the validator of the thing that has it, never assumed from the base.
 - **Bounds are literals in the rule**, never a public constant to clamp against, and they are pinned by two tests either side.
 - **Messages**: a custom check names its rule and says what was expected:
 
