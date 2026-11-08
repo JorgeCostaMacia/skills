@@ -11,7 +11,7 @@ This repo **ships** the GitFlow skill at [`plugins/gitflow/SKILL.md`](plugins/gi
 
 ## Versioning — lockstep
 
-All plugins version **as a single block** (same model as shared-net's central `VersionPrefix`): there is ONE version — the release's — and every `plugins/*/.claude-plugin/plugin.json` carries it. A release bumps **all** of them, changed or not, so plugin versions == git tag == GitHub Release, and any installed skill traces back to the exact tag. Never bump a single plugin on its own.
+All plugins version **as a single block** (the same model as the libraries' central `VersionPrefix`): there is ONE version — the release's — and every `plugins/*/.claude-plugin/plugin.json` carries it. A release bumps **all** of them, changed or not, so plugin versions == git tag == GitHub Release, and any installed skill traces back to the exact tag. Never bump a single plugin on its own.
 
 Bump one-liner (run on the `release/<version>` branch):
 
@@ -27,4 +27,4 @@ find plugins -name plugin.json -path "*/.claude-plugin/*" \
 
 See [CONTRIBUTING.md](CONTRIBUTING.md): create `plugins/<plugin>/SKILL.md` and its `.claude-plugin/plugin.json` (name, description, the lockstep version, author, and — for a stack skill — `dependencies` on the generic skills it realizes), register it in `.claude-plugin/marketplace.json` with the same description, add a row to `README.md`.
 
-Two kinds of skill, kept apart on purpose: the **generic** ones (`solid`, `clean-architecture`, `ddd`, `testing`, `logging`, `messaging`, `gitflow`, `pnpm`) state principles for any stack and never name a `-net` skill or a .NET type; each **`-net`** skill is the .NET realization of one of them and depends on it. Library mechanics (what `JorgeCostaMacia.*` does inside) stay in the libraries' READMEs; a skill says how the code uses them.
+Two kinds of skill, kept apart on purpose: the **generic** ones (`solid`, `clean-architecture`, `ddd`, `testing`, `logging`, `messaging`, `gitflow`, `pnpm`) state principles for any stack and never name a `-dotnet` skill or a .NET type; each **`-dotnet`** skill is the .NET realization of one of them and depends on it. Library mechanics (what `JorgeCostaMacia.*` does inside) stay in the libraries' READMEs; a skill says how the code uses them.
