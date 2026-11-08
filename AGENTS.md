@@ -11,7 +11,7 @@ This repo **ships** the GitFlow skill at [`plugins/gitflow/SKILL.md`](plugins/gi
 
 ## Versioning — lockstep
 
-All plugins version **as a single block** (same model as shared-net's central `VersionPrefix`): there is ONE version — the release's — and every `plugins/*/.claude-plugin/plugin.json` carries it. A release bumps **all** of them, changed or not, so plugin versions == git tag == GitHub Release, and any installed skill traces back to the exact tag. Never bump a single plugin on its own.
+All plugins version **as a single block** (the same model as the libraries' central `VersionPrefix`): there is ONE version — the release's — and every `plugins/*/.claude-plugin/plugin.json` carries it. A release bumps **all** of them, changed or not, so plugin versions == git tag == GitHub Release, and any installed skill traces back to the exact tag. Never bump a single plugin on its own.
 
 Bump one-liner (run on the `release/<version>` branch):
 
