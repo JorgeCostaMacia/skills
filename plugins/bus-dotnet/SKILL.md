@@ -19,6 +19,8 @@ description: >-
 
 The .NET *how* of `messaging` (load it for the *why*), for what every transport shares. `JorgeCostaMacia.Bus` is the agnostic root; each transport (`Bus.Kafka`, `Bus.RabbitMQ`) ships the **same simple names** — `Command`, `Event`, `CommandHandler<T>`, `EventSubscriber<T>`, `IBus` — in its own namespace, so moving transports is swapping the `using`s. Everything below holds for both; the transport skill adds topics, partitions, groups and dead-letter mechanics.
 
+**The libraries:** the contracts (`JorgeCostaMacia.Bus`) live in [bus-dotnet](https://github.com/JorgeCostaMacia/bus-dotnet), each transport in a repository of its own — [bus-kafka-dotnet](https://github.com/JorgeCostaMacia/bus-kafka-dotnet) and [bus-rabbitmq-dotnet](https://github.com/JorgeCostaMacia/bus-rabbitmq-dotnet) — and the retry store's configuration (`WithPostgresDefaults`) is `JorgeCostaMacia.Quartz`'s, in [quartz-dotnet](https://github.com/JorgeCostaMacia/quartz-dotnet). How each works inside is its README's; this skill is how the code uses them.
+
 ## Message records
 
 Messages live in the service's **contracts package**, never in the runtime. A command derives `Command`, an event `Event`; both are `sealed record`s carrying the aggregate metadata — `AggregateId`, `AggregateCorrelationId`, `AggregateOccurredAt`, `AggregateConsumers` (the destinations it is meant for, so other subscribers can filter it out).

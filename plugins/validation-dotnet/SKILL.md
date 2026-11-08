@@ -18,6 +18,8 @@ description: >-
 
 The .NET *how* of the two-level model defined in `ddd` (load it for the *why*). **FluentValidation is the accepted core coupling** for validation — deliberate, evaluated, not to be wrapped or replaced. This skill covers validators for anything — a request, a query criterion, a domain type; how a domain model applies it (which validator each type builds, and when) is `ddd-dotnet`'s.
 
+**The libraries:** the shared `ValidationException` base is `JorgeCostaMacia.DDD.Exception`'s, in [ddd-dotnet](https://github.com/JorgeCostaMacia/ddd-dotnet), and its HTTP rendering is `JorgeCostaMacia.Http.ProblemDetails`'s, in [http-dotnet](https://github.com/JorgeCostaMacia/http-dotnet). How they work inside is their READMEs'; this skill is how the code validates.
+
 ## The two levels, realized
 
 | Level | Question | Lives in | DI |

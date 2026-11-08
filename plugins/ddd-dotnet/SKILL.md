@@ -18,7 +18,7 @@ The .NET *how* of the model defined in `ddd` (load it for the *why*). How a vali
 
 ## The base types
 
-The building blocks come from the `JorgeCostaMacia.DDD.*` packages (the ddd-dotnet repository); derive from them, don't redeclare them.
+The building blocks come from the `JorgeCostaMacia.DDD.*` packages, in [ddd-dotnet](https://github.com/JorgeCostaMacia/ddd-dotnet); derive from them, don't redeclare them.
 
 | Package | Gives |
 | --- | --- |
