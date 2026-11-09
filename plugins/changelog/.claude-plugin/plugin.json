@@ -1,0 +1,10 @@
+{
+  "name": "changelog",
+  "description": "How a repository keeps its changelog: one CHANGELOG.md listing, newest first, only what a consumer has to act on (majors, behavior changes, new requirements), written on the release branch with the version bump, while README and AGENTS describe the present and carry no history.",
+  "version": "2.0.3",
+  "author": {
+    "name": "Jorge Costa Maciá",
+    "email": "costamaciajorge@gmail.com"
+  },
+  "license": "MIT"
+}

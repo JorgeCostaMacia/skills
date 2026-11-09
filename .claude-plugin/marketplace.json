@@ -3,12 +3,17 @@
   "owner": {
     "name": "Jorge Costa Maciá"
   },
-  "description": "Agent skills for software engineering: stack-agnostic principles (SOLID, clean architecture, DDD, testing, logging, messaging, GitFlow, pnpm) and their .NET realizations.",
+  "description": "Agent skills for software engineering: stack-agnostic principles (SOLID, clean architecture, DDD, testing, logging, messaging, GitFlow, changelog, pnpm) and their .NET realizations.",
   "plugins": [
     {
       "name": "gitflow",
       "source": "./plugins/gitflow",
       "description": "A GitFlow workflow for branches and releases: feature/bugfix/release/hotfix start and finish, SemVer tags, default merge messages, commit identity, and the phased-publish caveat."
+    },
+    {
+      "name": "changelog",
+      "source": "./plugins/changelog",
+      "description": "How a repository keeps its changelog: one CHANGELOG.md listing, newest first, only what a consumer has to act on (majors, behavior changes, new requirements), written on the release branch with the version bump, while README and AGENTS describe the present and carry no history."
     },
     {
       "name": "solid",
