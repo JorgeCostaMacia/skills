@@ -55,7 +55,7 @@ Use `git merge --no-ff --no-edit` so the **default** merge message is kept (`Mer
 1. Validate SemVer.
 2. Working tree clean. Release: `git checkout develop && git pull && git checkout -b release/<version>`. Hotfix: the same from `main`.
 3. `git push -u origin <branch>`.
-4. **Bump the package/project version(s) on this branch** and commit. The extension does not bump — this step is yours.
+4. **Bump the package/project version(s) on this branch** and commit. The extension does not bump — this step is yours. When the version carries something a consumer has to act on, its `CHANGELOG.md` entry goes in the same commit (see the `changelog` skill).
 
 ### Release / Hotfix finish (transactional — develop first)
 1. Working tree clean, and `v<version>` exists neither locally (`git tag -l v<version>`) nor on origin (`git ls-remote --tags origin v<version>`) — checked before anything is merged. `git pull` on `main` and on `develop`, then capture their commits (for rollback).

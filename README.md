@@ -13,6 +13,7 @@ Each skill lives as its own plugin under `plugins/`, so you can install only wha
 | Plugin | Description |
 | --- | --- |
 | [gitflow](plugins/gitflow) | A GitFlow workflow for branches and releases: feature/bugfix/release/hotfix start and finish, SemVer tags, default merge messages, commit identity, and the phased-publish caveat. |
+| [changelog](plugins/changelog) | How a repository keeps its changelog: one CHANGELOG.md listing, newest first, only what a consumer has to act on (majors, behavior changes, new requirements), written on the release branch with the version bump, while README and AGENTS describe the present and carry no history. |
 | [solid](plugins/solid) | Transversal software-engineering principles: SOLID, simple design, clean code, code smells and complexity management — applied with judgment, not dogma. |
 | [pnpm](plugins/pnpm) | Package-management baseline for any Node.js work: pnpm 12 with dependency build scripts denied unless reviewed (allowBuilds), a strict 3-day minimum release age, no exotic transitive sources, pinned package manager and Node 26, and frozen lockfile in CI. |
 | [clean-architecture](plugins/clean-architecture) | Clean architecture layering with hexagonal (ports & adapters) boundaries, stack-agnostic and canon-anchored: the four layers inside each bounded context, the inward dependency rule, ports for external capabilities, and the name mapping to Evans, Uncle Bob, Microsoft and Jason Taylor. |
