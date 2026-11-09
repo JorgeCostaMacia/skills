@@ -32,6 +32,7 @@ Messages are produced **without a key**: two messages for one aggregate can land
 
 - **The group id is the handler's or subscriber's route** (`{command route}.handler`, `{…}.on.{event route}.subscriber`). It is a **stable contract**: Kafka keeps the group's offsets under it, so renaming a route starts a new group from scratch and abandons the old one's position.
 - Each handler and subscriber is its own group, so every service — and every subscriber within one — receives every event of a topic it subscribes to.
+- **Where a new group starts is a per-service choice.** The library starts a group with no stored offset — its first start, a renamed route, a new major, offsets expired while it was stopped — at `Earliest`, the at-least-once bias: it replays what the topic still holds rather than skip what was published before it joined. A service whose handling reaches people (an email, a report) sets `Bus:Consumer:AutoOffsetReset` to `Latest` instead, since a replay sends everything again; the price is that nothing published before the group exists reaches it, so on a new major that service deploys before its producers move. A group with offsets keeps them either way: the setting only acts on a new one, and no group has to be recreated to apply it.
 
 ## Parked messages
 
