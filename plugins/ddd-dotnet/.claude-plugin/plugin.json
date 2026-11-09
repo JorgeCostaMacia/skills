@@ -1,7 +1,7 @@
 {
   "name": "ddd-dotnet",
   "description": "The .NET realization of tactical DDD: the JorgeCostaMacia.DDD.* base types, value objects with their four factories and Convert, no coercion or defaults, aggregates (From cascades, Create seals), the exception family with fixed codes, events collected on the root, and one DbContext per aggregate as its accessor.",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "author": {
     "name": "Jorge Costa Maciá",
     "email": "costamaciajorge@gmail.com"
