@@ -44,7 +44,7 @@ In Claude Code:
 
 Then `/skills` to view, and invoke with `/gitflow`.
 
-Update on demand:
+What an update asks of you, when it asks anything, is in [CHANGELOG.md](CHANGELOG.md). Update on demand:
 
 ```
 /plugin marketplace update jorgecostamacia-agent-skills
