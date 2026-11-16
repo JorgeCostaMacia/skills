@@ -31,7 +31,7 @@ This repo is a Claude Code **plugin marketplace** that hosts agent skills. Each 
 ## Conventions
 
 - Identifiers (`name`) in **kebab-case**.
-- Markdown/JSON: UTF-8, LF, 2-space indent (see `.editorconfig`).
+- Markdown/JSON: UTF-8, LF, 2-space indent (see `.editorconfig`); Markdown written as the `code-style-md` skill says (one paragraph per line).
 - Keep each `SKILL.md` focused and actionable; prefer concrete steps over prose.
 
 ## Test locally
