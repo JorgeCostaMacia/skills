@@ -1,0 +1,10 @@
+{
+  "name": "code-style-md",
+  "description": "How Markdown is written in every repository: one paragraph per line, never wrapped by hand and with no forced breaks, kept by Prettier with proseWrap never; code spans for everything literal and bold kept rare; fenced code blocks with their language and commands without a prompt; relative links inside the repo; small tables for comparisons only; sentence-case headings, alerts, Mermaid diagrams, and HTML only where Markdown cannot; and the one-off sweep that brings an existing repo in line.",
+  "version": "2.1.0",
+  "author": {
+    "name": "Jorge Costa Maciá",
+    "email": "costamaciajorge@gmail.com"
+  },
+  "license": "MIT"
+}

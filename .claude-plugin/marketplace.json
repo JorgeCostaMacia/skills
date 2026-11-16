@@ -16,6 +16,11 @@
       "description": "How a repository keeps its changelog: one CHANGELOG.md listing, newest first, only what a consumer has to act on (majors, behavior changes, new requirements), written on the release branch with the version bump, while README and AGENTS describe the present and carry no history."
     },
     {
+      "name": "code-style-md",
+      "source": "./plugins/code-style-md",
+      "description": "How Markdown is written in every repository: one paragraph per line, never wrapped by hand and with no forced breaks, kept by Prettier with proseWrap never; code spans for everything literal and bold kept rare; fenced code blocks with their language and commands without a prompt; relative links inside the repo; small tables for comparisons only; sentence-case headings, alerts, Mermaid diagrams, and HTML only where Markdown cannot; and the one-off sweep that brings an existing repo in line."
+    },
+    {
       "name": "solid",
       "source": "./plugins/solid",
       "description": "Transversal software-engineering principles: SOLID, simple design, clean code, code smells and complexity management — applied with judgment, not dogma."
