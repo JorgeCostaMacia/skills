@@ -22,6 +22,7 @@ find plugins -name plugin.json -path "*/.claude-plugin/*" \
 - Use git's **default merge message** (`--no-ff --no-edit`, never `-m`).
 - Commit with the identity git already has for this repo (its own, set at repo level); **no** `Co-Authored-By` / Claude / Anthropic trailer.
 - Branch prefixes only: `feature` / `bugfix` / `release` / `hotfix`.
+- Docs and every `SKILL.md` body follow the `code-style-md` skill: one paragraph per line, never wrapped by hand. A `SKILL.md` frontmatter is YAML, and its folded `description` is wrapped as YAML.
 
 ## Adding a skill
 
