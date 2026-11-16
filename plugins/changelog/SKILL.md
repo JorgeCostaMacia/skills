@@ -45,7 +45,7 @@ Every topic moves to the new major, with fewer partitions; the messages do not c
 ```
 
 - One `##` section per listed version, newest first, the bare version number as its heading: the date is the tag's, and the Release workflow finds the section by that heading.
-- **One paragraph per line**, never wrapped by hand: the section is copied into the Release's notes, where every line break is kept.
+- **One paragraph per line**, as in every `.md` (the `code-style-md` skill). Here it matters twice: the section is copied into the Release's notes, where every line break is kept.
 - Two or three sentences in the consumer's terms: what changed, then what to do. Name the setting, the id, the topic, the column — never "various improvements".
 - Concrete numbers belong here (the old value and the new, the version a thing started): this is the one document that is history on purpose.
 

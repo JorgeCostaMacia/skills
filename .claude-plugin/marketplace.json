@@ -18,7 +18,7 @@
     {
       "name": "code-style-md",
       "source": "./plugins/code-style-md",
-      "description": "How Markdown is written in every repository: one paragraph per line, never wrapped by hand and with no forced breaks, kept by Prettier with proseWrap never; code spans for everything literal and bold kept rare; fenced code blocks with their language and commands without a prompt; relative links inside the repo; small tables for comparisons only; sentence-case headings, alerts, Mermaid diagrams, and HTML only where Markdown cannot; and the one-off sweep that brings an existing repo in line."
+      "description": "How Markdown is written in every repository, whatever the stack and its tools: one paragraph per line, never wrapped by hand and with no forced breaks; no trailing whitespace; code spans for everything literal and bold kept rare; fenced code blocks with their language and commands without a prompt; relative links inside the repo; small tables for comparisons only; sentence-case headings, alerts, Mermaid diagrams, and HTML only where Markdown cannot; and reflowing an existing repo once."
     },
     {
       "name": "solid",
@@ -28,7 +28,7 @@
     {
       "name": "pnpm",
       "source": "./plugins/pnpm",
-      "description": "Package-management baseline for any Node.js work: pnpm 12 with dependency build scripts denied unless reviewed (allowBuilds), a strict 3-day minimum release age, no exotic transitive sources, pinned package manager and Node 26, and frozen lockfile in CI."
+      "description": "Package-management baseline for any Node.js work: pnpm 12 with dependency build scripts denied unless reviewed (allowBuilds), a strict 3-day minimum release age, no exotic transitive sources, pinned package manager and Node 26, frozen lockfile in CI, and the Prettier baseline every Node repo formats with (120 columns, single quotes, Markdown one paragraph per line)."
     },
     {
       "name": "clean-architecture",

@@ -8,7 +8,8 @@ description: >-
   a Node repo. It mandates pnpm 12 with supply-chain hardening: dependency
   build scripts denied unless reviewed (allowBuilds), a 3-day minimum release
   age enforced strictly, no exotic transitive sources, pinned package manager and Node 26,
-  and frozen lockfile in CI.
+  frozen lockfile in CI, and the Prettier baseline every Node repo formats with
+  (120 columns, single quotes, Markdown one paragraph per line).
 ---
 
 # pnpm — supply-chain hardened baseline
@@ -57,6 +58,23 @@ allowBuilds:              # reviewed packages only: true runs its build scripts,
 ```
 
 Optional, stricter: `trustPolicy: no-downgrade` fails an install when a package's trust evidence (provenance, trusted publishing) drops below what its earlier releases had — the signature of a hijacked maintainer account. Exceptions go in `trustPolicyExclude` (`'pkg@1.2.3'`).
+
+## Formatting baseline
+
+Every Node repo formats with Prettier, a devDependency like any other, with the same three options whatever the framework:
+
+```json
+{
+  "printWidth": 120,
+  "singleQuote": true,
+  "proseWrap": "never"
+}
+```
+
+- `printWidth: 120`, the same width as C#: Prettier's default is 80, and a framework that generates its own config (`ng new` sets 100) gets 120 instead.
+- `proseWrap: "never"` keeps the `code-style-md` skill's one paragraph per line in every `.md` of the repo: Prettier joins a hand-wrapped paragraph, and the check stops one coming back.
+- A framework's own entries stay beside them: Astro's plugin and its `*.astro` parser override, Angular's `*.html` override.
+- `format` (`prettier --write .`) and `format:check` (`prettier --check .`) scripts; `format:check` runs in the CI gate. What is generated (the build output, the lockfile) goes in `.prettierignore`.
 
 ## When scaffolding or updating
 
