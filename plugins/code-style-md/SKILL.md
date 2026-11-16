@@ -3,21 +3,20 @@ name: code-style-md
 description: >-
   How Markdown is written in every repository — README, AGENTS, CONTRIBUTING,
   CHANGELOG, SECURITY, a skill's SKILL.md, any .md. Use when writing, editing
-  or reviewing a Markdown file, configuring Prettier or .editorconfig for one,
-  or when a doc's lines are wrapped by hand, its code blocks carry no language,
-  its links point at a file of the same repo by URL, or bold is everywhere. It
-  encodes: one paragraph per line (never wrapped by hand, no forced breaks),
-  Prettier with proseWrap never as the tool that keeps it, code spans for
-  everything literal and bold kept rare, fenced code blocks with their language
-  and commands without a prompt, relative links inside the repo, tables small
-  and for comparisons only, headings, alerts, images and diagrams, HTML only
-  where Markdown cannot, and the one-off sweep that brings an existing repo in
-  line.
+  or reviewing a Markdown file, or when a doc's lines are wrapped by hand, its
+  code blocks carry no language, its links point at a file of the same repo by
+  URL, or bold is everywhere. It encodes how a doc must read, whatever the
+  stack and its tools: one paragraph per line (never wrapped by hand, no forced
+  breaks), no trailing whitespace, code spans for everything literal and bold
+  kept rare, fenced code blocks with their language and commands without a
+  prompt, relative links inside the repo, tables small and for comparisons
+  only, headings, alerts, images and diagrams, HTML only where Markdown cannot,
+  and reflowing an existing repo once.
 ---
 
 # Markdown style
 
-Markdown is what every repository is read through: on the forge, in an editor, and quoted into Releases, issues and pull requests. One way of writing it, the same in every repo, so a doc never has to be reflowed to be read and a diff shows what changed. What a repo's docs hold — which files, and what goes in each — is not this skill's; this one is how any `.md` is written.
+Markdown is what every repository is read through: on the forge, in an editor, and quoted into Releases, issues and pull requests. One way of writing it, the same in every repo, so a doc never has to be reflowed to be read and a diff shows what changed. What a repo's docs hold — which files, and what goes in each — is not this skill's; this one is how any `.md` is written. It says how a doc must read, not which tool gets it there: where the stack runs a formatter, its baseline configures it to keep these rules; where none runs, they are followed by hand.
 
 ## One paragraph per line
 
@@ -26,11 +25,10 @@ Markdown is what every repository is read through: on the forge, in an editor, a
 - **No forced line breaks**: no two trailing spaces, no backslash, no `<br>`. A paragraph ends with a blank line; what needs a line of its own is a list item.
 - A column limit (120 in C#, TypeScript and YAML) is for code, not for prose.
 
-## The tools keep it
+## Whitespace
 
-- **Prettier with `"proseWrap": "never"`** in a repo that already runs Prettier (a Node repo): it joins every paragraph into one line, and its `format:check` stops a wrapped one coming back. That is the whole configuration for Markdown.
-- **`.editorconfig` trims trailing whitespace in `.md` too**: with no forced breaks there is nothing to keep, so no `trim_trailing_whitespace = false` section for Markdown.
-- A repo without Prettier has nothing to check it: the rule stays in its AGENTS, and the sweep below brings it in line once.
+- **No trailing whitespace in `.md` either**: with no forced breaks there is nothing to keep, so the repo's `.editorconfig` trims it in Markdown as everywhere, with no `trim_trailing_whitespace = false` section for `*.md`.
+- LF line endings and a final newline, as the rest of the repo.
 
 ## Inline
 
@@ -42,7 +40,7 @@ Markdown is what every repository is read through: on the forge, in an editor, a
 
 - **Fenced code blocks always carry their language** (`bash`, `powershell`, `yaml`, `json`, `csharp`, `ts`, `text`), so they are highlighted and the reader knows where to run them. A command is written to be copied: no `$` or `>` prompt, and its output, if shown, in a block of its own.
 - **Lists**: steps in order are a numbered list, a set of points a bulleted one (`-`). One idea per item.
-- **Tables are small and for comparisons** (options against criteria, items against the same fields). Prettier aligns their columns, so one changed cell can re-pad the whole table in the diff: a table that keeps growing becomes a list.
+- **Tables are small and for comparisons** (options against criteria, items against the same fields). A formatter aligns their columns, so one changed cell can re-pad the whole table in the diff: a table that keeps growing becomes a list.
 - **Alerts** for what must not be skipped: `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`, `> [!CAUTION]`, which GitHub renders as callouts, instead of bold or capitals.
 - **Diagrams in a ` ```mermaid ` block** rather than an image: the forge renders it, and a change to it is a readable diff. An image always has alt text that says what it shows.
 - **HTML only where Markdown cannot** (a centered banner, an image's width). Never `<br>`, `<b>`, `<i>` or a `<table>` that Markdown could write.
@@ -54,15 +52,4 @@ Markdown is what every repository is read through: on the forge, in an editor, a
 
 ## Bringing a repo in line
 
-Once per repo, in a feature branch of its own, as a commit that does nothing else:
-
-- **With Prettier**: set `"proseWrap": "never"` in its config and run its `format` script.
-- **Without it**: run Prettier once over the Markdown, with nothing installed in the repo:
-
-  ```bash
-  pnpm dlx prettier --prose-wrap never --write "**/*.md"
-  ```
-
-- In both, drop a `trim_trailing_whitespace = false` section for Markdown from `.editorconfig`.
-
-Prettier also normalizes the rest of the Markdown (list markers, emphasis, table padding): review the diff, and keep what it does, since that is the form the rule now holds. Bold, code spans, links and headings it does not judge: fix those by hand when a file is touched. A file Prettier must not touch (a generated one, a template whose layout is its content) goes in `.prettierignore`.
+A repo whose docs are wrapped by hand is reflowed once, in a feature branch of its own, as a commit that does nothing else, with whatever the stack has; its `.editorconfig` loses any `trim_trailing_whitespace = false` section for Markdown in the same commit. Review the diff: only the source's layout may change, never what the doc renders. What no tool judges — bold, code spans, links, headings — is fixed by hand when a file is touched.
