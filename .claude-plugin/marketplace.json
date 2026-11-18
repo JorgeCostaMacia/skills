@@ -31,6 +31,11 @@
       "description": "Package-management baseline for any Node.js work: pnpm 12 with dependency build scripts denied unless reviewed (allowBuilds), a strict 3-day minimum release age, no exotic transitive sources, pinned package manager and Node 26, frozen lockfile in CI, and the Prettier baseline every Node repo formats with (120 columns, single quotes, Markdown one paragraph per line)."
     },
     {
+      "name": "astro",
+      "source": "./plugins/astro",
+      "description": "How a static website is built with Astro and served as plain files: the configuration from the first commit, static output with clean URLs and real redirects in the server, scoped CSS that never wins by order and stays in cacheable files, behaviour as custom elements, a strict hash-based CSP with third-party hosts added per environment variable, build-time configuration with a hidden review build, self-hosted fonts, images sized to their boxes, per-page SEO and JSON-LD, prefixed locales with hreflang, content link tests, the server's headers and caching whatever the server, and testing on the real domain before the DNS moves."
+    },
+    {
       "name": "clean-architecture",
       "source": "./plugins/clean-architecture",
       "description": "Clean architecture layering with hexagonal (ports & adapters) boundaries, stack-agnostic and canon-anchored: the four layers inside each bounded context, the inward dependency rule, ports for external capabilities, and the name mapping to Evans, Uncle Bob, Microsoft and Jason Taylor."
