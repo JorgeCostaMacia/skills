@@ -1,0 +1,10 @@
+{
+  "name": "astro",
+  "description": "How a static website is built with Astro and served as plain files: the configuration from the first commit, static output with clean URLs and real redirects in the server, scoped CSS that never wins by order and stays in cacheable files, behaviour as custom elements, a strict hash-based CSP with third-party hosts added per environment variable, build-time configuration with a hidden review build, self-hosted fonts, images sized to their boxes, per-page SEO and JSON-LD, prefixed locales with hreflang, content link tests, the server's headers and caching whatever the server, and testing on the real domain before the DNS moves.",
+  "version": "2.2.0",
+  "author": {
+    "name": "Jorge Costa Maciá",
+    "email": "costamaciajorge@gmail.com"
+  },
+  "license": "MIT"
+}
